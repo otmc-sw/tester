@@ -12,5 +12,11 @@ export type {
   UiError,
   TestResult,
   ResourceApi,
-  TestConfig
+  TestConfig,
+  ValidationError,
+  TestExpectations,
+  HttpMethod,
+  TestContract,
+  ShorthandTestContract,
+  ValidationResult
 } from './core/types.js';

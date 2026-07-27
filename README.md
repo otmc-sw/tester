@@ -51,6 +51,65 @@ await tester.cleanup();
 
 ## API Testing
 
+### Contract-Based Testing
+
+The framework supports contract-based testing where you define the expected response model and the framework automatically handles validation, deserialization, and error reporting.
+
+```typescript
+class User {
+  id!: string;
+  username!: string;
+  email!: string;
+}
+
+// Regular syntax
+const user = await api.test({
+  method: 'POST',
+  url: '/users',
+  request: {
+    username: 'john',
+    email: 'john@example.com',
+  },
+  response: User,
+});
+
+// Shorthand syntax
+const user = await api.test({
+  POST: '/users',
+  request: {
+    username: 'john',
+    email: 'john@example.com',
+  },
+  response: User,
+});
+
+// With custom expectations
+const user = await api.test({
+  POST: '/users',
+  request: body,
+  response: User,
+  expect: {
+    status: 201,
+    responseTime: 500,
+    headers: {
+      'cache-control': 'no-store',
+    },
+  },
+});
+
+console.log(user.username); // Fully typed
+```
+
+The framework automatically:
+- Validates HTTP status (defaults: 200 for GET/PUT/PATCH, 201 for POST, 204 for DELETE)
+- Validates Content-Type header
+- Parses JSON response
+- Deserializes into the expected model
+- Validates required fields and types
+- Measures response time
+- Logs request/response
+- Throws descriptive `ApiError` with validation details on failure
+
 ### HTTP Methods
 
 ```typescript

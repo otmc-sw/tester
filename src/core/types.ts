@@ -27,6 +27,13 @@ export interface AuthConfig {
   tokenUrl?: string;
 }
 
+export interface ValidationError {
+  path: string;
+  message: string;
+  expected?: unknown;
+  actual?: unknown;
+}
+
 export interface ApiError extends Error {
   status: number;
   url: string;
@@ -34,6 +41,7 @@ export interface ApiError extends Error {
   request?: unknown;
   response?: unknown;
   duration: number;
+  validationErrors?: ValidationError[];
 }
 
 export interface UiError extends Error {
@@ -93,4 +101,39 @@ export interface TestConfig {
     headers?: Record<string, string>;
     responseTime?: number;
   };
+}
+
+export interface TestExpectations {
+  status?: number;
+  responseTime?: number;
+  headers?: Record<string, string>;
+  contentType?: string;
+}
+
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS';
+
+export interface TestContract<TRequest = unknown, TResponse extends object = object> {
+  method?: HttpMethod;
+  url?: string;
+  request?: TRequest;
+  response: new () => TResponse;
+  expect?: TestExpectations;
+}
+
+export interface ShorthandTestContract<TRequest = unknown, TResponse extends object = object> {
+  GET?: string;
+  POST?: string;
+  PUT?: string;
+  PATCH?: string;
+  DELETE?: string;
+  HEAD?: string;
+  OPTIONS?: string;
+  request?: TRequest;
+  response: new () => TResponse;
+  expect?: TestExpectations;
+}
+
+export interface ValidationResult {
+  isValid: boolean;
+  errors: ValidationError[];
 }

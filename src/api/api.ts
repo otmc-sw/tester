@@ -1,4 +1,5 @@
 import { ApiClient } from './client.js';
+import type { TestContract, ShorthandTestContract } from '../core/types.js';
 
 let currentClient: ApiClient | null = null;
 
@@ -46,5 +47,11 @@ export const api = {
   setAuthToken: (token: string) => {
     if (!currentClient) throw new Error('API client not initialized');
     currentClient.setAuthToken(token);
+  },
+  test: <TRequest, TResponse extends Record<string, unknown>>(
+    contract: TestContract<TRequest, TResponse> | ShorthandTestContract<TRequest, TResponse>
+  ) => {
+    if (!currentClient) throw new Error('API client not initialized');
+    return currentClient.test<TRequest, TResponse>(contract);
   },
 };
