@@ -28,7 +28,7 @@ export class AuthenticationManager {
       throw new Error(`Login failed: ${response.statusText}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as { token?: string; access_token?: string; accessToken?: string };
     
     if (this.authConfig.type === 'jwt' || this.authConfig.type === 'bearer') {
       this.token = data.token || data.access_token || data.accessToken;
