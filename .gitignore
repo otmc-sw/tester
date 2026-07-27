@@ -1,0 +1,34 @@
+#
+# OTMC License.
+# Copyright (c) 2026 OTMC Softwares. All rights reserved.
+# Contributors: Nguyen Van Trung, OTMC Authors.
+# 
+
+# IDEs
+.idea/
+.vscode/
+
+# Cache
+logs/
+cache/
+data/
+tmp/
+build/
+bin/
+*.exe
+*.log
+*.tgz
+
+# Node.JS
+package-lock.json
+playwright-report
+test-results
+node_modules
+dist
+dist-ssr
+*.local
+
+# Python
+*.pyc
+__pycache__/
+
