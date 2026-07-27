@@ -102,7 +102,7 @@ async function main() {
     // Example 6: DELETE request
     await api.test({
       DELETE: '/users/1',
-      response: class Empty {},
+      response: class Empty { [key: string]: unknown },
       expect: {
         status: 204,
       },

@@ -11,18 +11,23 @@ export class ApiClient {
   private logger: Logger;
   private context?: APIRequestContext;
   private auth: AuthenticationManager;
+  private responseParser: ResponseParser;
 
   constructor(config: TesterConfig, logger: Logger) {
     this.config = config;
     this.logger = logger;
     this.auth = new AuthenticationManager(config, logger);
+    this.responseParser = new ResponseParser(config.responseContract);
   }
 
   async initialize(): Promise<APIRequestContext> {
     this.context = await request.newContext({
       baseURL: this.config.baseURL,
       timeout: this.config.timeout ?? 30000,
+      ignoreHTTPSErrors: true,
     });
+    // Set environment variable to ignore SSL errors for Node.js
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     return this.context;
   }
 
@@ -101,6 +106,7 @@ export class ApiClient {
         request: body,
         duration,
       };
+      console.error('Request failed:', error);
       throw apiError;
     }
   }
@@ -219,7 +225,7 @@ export class ApiClient {
       });
 
       // Parse and validate response
-      const parsed = await ResponseParser.parse(response, ModelClass, finalExpectations, duration);
+      const parsed = await this.responseParser.parse(response, ModelClass, finalExpectations, duration);
 
       // If there are validation errors, throw ApiError
       if (parsed.validationErrors.length > 0) {

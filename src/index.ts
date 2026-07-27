@@ -18,5 +18,10 @@ export type {
   HttpMethod,
   TestContract,
   ShorthandTestContract,
-  ValidationResult
+  ValidationResult,
+  ErrorDetail,
+  DefaultSuccessEnvelope,
+  DefaultErrorEnvelope,
+  ResponseContractConfig,
+  ResponseContract
 } from './core/types.js';

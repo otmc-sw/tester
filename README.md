@@ -110,6 +110,85 @@ The framework automatically:
 - Logs request/response
 - Throws descriptive `ApiError` with validation details on failure
 
+### Response Envelopes
+
+Most REST APIs wrap responses in a success/error envelope. The framework automatically handles unwrapping these envelopes.
+
+**Default Envelope**
+
+By default, the framework expects this structure:
+
+```json
+{
+  "success": true,
+  "message": "Operation completed successfully.",
+  "data": { ... }
+}
+```
+
+The framework automatically:
+- Validates `success == true`
+- Validates `message` exists
+- Validates `data` exists
+- Unwraps and deserializes `data` into your model
+
+You receive only the business object, not the envelope.
+
+**Custom Envelope**
+
+Configure a custom envelope structure:
+
+```typescript
+const tester = createTester({
+  baseURL: 'https://api.example.com',
+  responseContract: {
+    success: {
+      successField: 'ok',
+      messageField: 'message',
+      dataField: 'result',
+    },
+    error: {
+      successField: 'ok',
+      messageField: 'message',
+      errorField: 'exception',
+    },
+  },
+});
+```
+
+**Disable Envelope**
+
+For APIs that return plain JSON:
+
+```typescript
+const tester = createTester({
+  baseURL: 'https://api.example.com',
+  responseContract: false,
+});
+```
+
+**Error Handling**
+
+Error responses are automatically parsed and thrown as `ApiError` with detailed fields:
+
+```typescript
+try {
+  await api.test({ POST: '/users', request: body, response: User });
+} catch (error) {
+  if (error instanceof Error && error.name === 'ApiError') {
+    console.error(error.code);      // Error code
+    console.error(error.key);       // Error key
+    console.error(error.type);      // Error type
+    console.error(error.summary);   // Error summary
+    console.error(error.detail);    // Error detail
+    console.error(error.file);      // Source file
+    console.error(error.line);      // Source line
+    console.error(error.function); // Source function
+    console.error(error.timestamp); // Error timestamp
+  }
+}
+```
+
 ### HTTP Methods
 
 ```typescript

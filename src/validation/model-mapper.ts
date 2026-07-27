@@ -1,4 +1,14 @@
 export class ModelMapper {
+  static map<T extends object>(
+    data: unknown,
+    ModelClass: new () => T
+  ): T | T[] {
+    if (Array.isArray(data)) {
+      return this.mapToArray(data, ModelClass);
+    }
+    return this.mapToClass(data, ModelClass);
+  }
+
   static mapToClass<T extends object>(
     data: unknown,
     ModelClass: new () => T

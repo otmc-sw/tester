@@ -18,9 +18,29 @@ export class ClassValidator<T extends object> implements Validator<T> {
       return { isValid: false, errors };
     }
 
+    // Handle array responses
+    if (Array.isArray(data)) {
+      for (let i = 0; i < data.length; i++) {
+        const validationResult = this.validateObject(data[i], i);
+        errors.push(...validationResult.errors);
+      }
+      return {
+        isValid: errors.length === 0,
+        errors,
+      };
+    }
+
+    // Handle single object responses
+    return this.validateObject(data);
+  }
+
+  private validateObject(data: unknown, index?: number): ValidationResult {
+    const errors: ValidationError[] = [];
+    const prefix = index !== undefined ? `[${index}].` : '';
+
     if (typeof data !== 'object') {
       errors.push({
-        path: '',
+        path: prefix,
         message: 'Response must be an object',
         expected: 'object',
         actual: typeof data,
@@ -35,7 +55,7 @@ export class ClassValidator<T extends object> implements Validator<T> {
     for (const key of expectedKeys) {
       if (!(key in dataObj)) {
         errors.push({
-          path: String(key),
+          path: prefix + String(key),
           message: `Required field '${String(key)}' is missing`,
         });
         continue;
@@ -47,7 +67,7 @@ export class ClassValidator<T extends object> implements Validator<T> {
 
       if (actualType !== expectedType && actualValue !== null && actualValue !== undefined) {
         errors.push({
-          path: String(key),
+          path: prefix + String(key),
           message: `Field '${String(key)}' has incorrect type`,
           expected: expectedType,
           actual: actualType,

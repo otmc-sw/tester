@@ -1,7 +1,8 @@
 import type { APIResponse } from 'playwright';
-import type { TestExpectations, ValidationError, ValidationResult } from '../core/types.js';
+import type { TestExpectations, ValidationError, ValidationResult, ResponseContract } from '../core/types.js';
 import { ClassValidator } from './validator.js';
 import { ModelMapper } from './model-mapper.js';
+import { ResponseEnvelopeProcessor } from './envelope-processor.js';
 
 export interface ParsedResponse<T> {
   data: T;
@@ -12,7 +13,13 @@ export interface ParsedResponse<T> {
 }
 
 export class ResponseParser {
-  static async parse<T extends object>(
+  private envelopeProcessor: ResponseEnvelopeProcessor;
+
+  constructor(responseContract?: ResponseContract) {
+    this.envelopeProcessor = new ResponseEnvelopeProcessor(responseContract);
+  }
+
+  async parse<T extends object>(
     response: APIResponse,
     ModelClass: new () => T,
     expectations?: TestExpectations,
@@ -95,16 +102,65 @@ export class ResponseParser {
       });
     }
 
-    // Validate model
+    // Process envelope
+    const envelopeResult = this.envelopeProcessor.process<unknown>(responseBody);
+    
+    // Add envelope validation errors
+    if (envelopeResult.validationErrors) {
+      validationErrors.push(...envelopeResult.validationErrors);
+    }
+
+    // If it's an error response, return with error details
+    if (envelopeResult.isError) {
+      const error = new Error('API returned error response') as Error & { 
+        status: number; 
+        url: string; 
+        headers: Record<string, string>; 
+        request?: unknown; 
+        response?: unknown; 
+        duration: number;
+        validationErrors?: ValidationError[];
+        code?: number;
+        key?: string;
+        type?: string;
+        summary?: string;
+        detail?: string;
+        file?: string;
+        line?: number;
+        function?: string;
+        timestamp?: string;
+      };
+      error.name = 'ApiError';
+      error.status = status;
+      error.url = response.url();
+      error.headers = headers;
+      error.duration = duration || 0;
+      error.validationErrors = validationErrors;
+      error.response = responseBody;
+      if (envelopeResult.errorDetail) {
+        error.code = envelopeResult.errorDetail.code;
+        error.key = envelopeResult.errorDetail.key;
+        error.type = envelopeResult.errorDetail.type;
+        error.summary = envelopeResult.errorDetail.summary;
+        error.detail = envelopeResult.errorDetail.detail;
+        error.file = envelopeResult.errorDetail.file;
+        error.line = envelopeResult.errorDetail.line;
+        error.function = envelopeResult.errorDetail.function;
+        error.timestamp = envelopeResult.errorDetail.timestamp;
+      }
+      throw error;
+    }
+
+    // Validate model against the unwrapped data
     const validator = new ClassValidator(ModelClass as new () => Record<string, unknown>);
-    const validationResult: ValidationResult = validator.validate(responseBody);
+    const validationResult: ValidationResult = validator.validate(envelopeResult.data);
     
     if (!validationResult.isValid) {
       validationErrors.push(...validationResult.errors);
     }
 
-    // Map to class
-    const data = ModelMapper.mapToClass(responseBody, ModelClass as new () => Record<string, unknown>) as T;
+    // Map to class (handles both single objects and arrays)
+    const data = ModelMapper.map(envelopeResult.data, ModelClass as new () => Record<string, unknown>) as T;
 
     return {
       data,

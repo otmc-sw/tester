@@ -11,6 +11,7 @@ export interface TesterConfig {
   userAgent?: string;
   locale?: string;
   timezoneId?: string;
+  responseContract?: ResponseContract;
 }
 
 export interface AuthConfig {
@@ -42,6 +43,15 @@ export interface ApiError extends Error {
   response?: unknown;
   duration: number;
   validationErrors?: ValidationError[];
+  code?: number;
+  key?: string;
+  type?: string;
+  summary?: string;
+  detail?: string;
+  file?: string;
+  line?: number;
+  function?: string;
+  timestamp?: string;
 }
 
 export interface UiError extends Error {
@@ -137,3 +147,42 @@ export interface ValidationResult {
   isValid: boolean;
   errors: ValidationError[];
 }
+
+export interface ErrorDetail {
+  code?: number;
+  key?: string;
+  type?: string;
+  summary?: string;
+  detail?: string;
+  file?: string;
+  line?: number;
+  function?: string;
+  timestamp?: string;
+}
+
+export interface DefaultSuccessEnvelope<T> {
+  success: true;
+  message: string;
+  data: T;
+}
+
+export interface DefaultErrorEnvelope {
+  success: false;
+  message: string;
+  error: ErrorDetail;
+}
+
+export interface ResponseContractConfig {
+  success?: {
+    successField?: string;
+    messageField?: string;
+    dataField?: string;
+  };
+  error?: {
+    successField?: string;
+    messageField?: string;
+    errorField?: string;
+  };
+}
+
+export type ResponseContract = ResponseContractConfig | false;
