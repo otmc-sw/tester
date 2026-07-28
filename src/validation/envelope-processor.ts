@@ -1,3 +1,8 @@
+/**
+ * @License Apache License 2.0
+ * @Copyright (c) 2026 OTMC Softwares.
+ * @Contributors Nguyen Van Trung, OTMC Contributors.
+ **/
 import type { ResponseContract, ResponseContractConfig, ErrorDetail, ValidationError } from '../core/types.js';
 
 export interface EnvelopeResult<T> {
@@ -31,7 +36,6 @@ export class ResponseEnvelopeProcessor {
 
   process<T>(response: unknown): EnvelopeResult<T> {
     if (this.contract === false) {
-      // Envelope disabled, return response as-is
       return { data: response as T, isError: false };
     }
 
@@ -47,35 +51,42 @@ export class ResponseEnvelopeProcessor {
     }
 
     const responseObj = response as Record<string, unknown>;
-    const successConfig = this.contract.success || this.getDefaultContract().success!;
-    const errorConfig = this.contract.error || this.getDefaultContract().error!;
+    const defaultContract = this.getDefaultContract();
 
-    // Check if this is an error response
+    const successConfig = this.contract.success || defaultContract.success;
+    const errorConfig = this.contract.error || defaultContract.error;
+
+    const hasCustomSuccessConfig = !!this.contract.success;
+    const hasCustomErrorConfig = !!this.contract.error;
+
+    if (!successConfig || !errorConfig) {
+      return { data: response as T, isError: false };
+    }
+
     const successField = successConfig.successField || 'success';
     const successValue = responseObj[successField];
-    
+
     if (successValue === false) {
-      return this.processErrorEnvelope(responseObj, errorConfig);
+      return this.processErrorEnvelope(responseObj, errorConfig, hasCustomErrorConfig);
     }
 
     if (successValue === true) {
-      return this.processSuccessEnvelope<T>(responseObj, successConfig);
+      return this.processSuccessEnvelope<T>(responseObj, successConfig, hasCustomSuccessConfig);
     }
 
-    // If success field is missing or has unexpected value, treat as plain response
     return { data: response as T, isError: false };
   }
 
   private processSuccessEnvelope<T>(
     response: Record<string, unknown>,
-    config: { successField?: string; messageField?: string; dataField?: string }
+    config: { successField?: string; messageField?: string | undefined; dataField?: string },
+    isCustomConfig: boolean
   ): EnvelopeResult<T> {
-    const successField = config.successField || 'success';
-    const messageField = config.messageField || 'message';
-    const dataField = config.dataField || 'data';
+    const successField = config.successField ?? 'success';
+    const messageField = config.messageField;
+    const dataField = config.dataField ?? 'data';
     const validationErrors: ValidationError[] = [];
 
-    // Validate success field
     if (response[successField] !== true) {
       validationErrors.push({
         path: successField,
@@ -85,15 +96,13 @@ export class ResponseEnvelopeProcessor {
       });
     }
 
-    // Validate message field exists
-    if (!(messageField in response)) {
+    if (isCustomConfig && messageField !== undefined && !(messageField in response)) {
       validationErrors.push({
         path: messageField,
         message: `Message field '${messageField}' is missing`,
       });
     }
 
-    // Validate data field exists
     if (!(dataField in response)) {
       validationErrors.push({
         path: dataField,
@@ -112,14 +121,14 @@ export class ResponseEnvelopeProcessor {
 
   private processErrorEnvelope(
     response: Record<string, unknown>,
-    config: { successField?: string;  messageField?: string; errorField?: string }
+    config: { successField?: string;  messageField?: string; errorField?: string },
+    isCustomConfig: boolean
   ): EnvelopeResult<never> {
-    const successField = config.successField || 'success';
-    const messageField = config.messageField || 'message';
-    const errorField = config.errorField || 'error';
+    const successField = config.successField ?? 'success';
+    const messageField = config.messageField;
+    const errorField = config.errorField ?? 'error';
     const validationErrors: ValidationError[] = [];
 
-    // Validate success field
     if (response[successField] !== false) {
       validationErrors.push({
         path: successField,
@@ -129,15 +138,13 @@ export class ResponseEnvelopeProcessor {
       });
     }
 
-    // Validate message field exists
-    if (!(messageField in response)) {
+    if (isCustomConfig && messageField !== undefined && !(messageField in response)) {
       validationErrors.push({
         path: messageField,
         message: `Message field '${messageField}' is missing`,
       });
     }
 
-    // Validate error field exists
     if (!(errorField in response)) {
       validationErrors.push({
         path: errorField,
@@ -147,7 +154,6 @@ export class ResponseEnvelopeProcessor {
 
     const errorObj = response[errorField] as Record<string, unknown>;
 
-    // Extract error detail fields
     const errorDetail: ErrorDetail = {
       code: typeof errorObj.code === 'number' ? errorObj.code : undefined,
       key: typeof errorObj.key === 'string' ? errorObj.key : undefined,

@@ -1,3 +1,8 @@
+/**
+ * @License Apache License 2.0
+ * @Copyright (c) 2026 OTMC Softwares.
+ * @Contributors Nguyen Van Trung, OTMC Contributors.
+ **/
 import { mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import type { Logger } from './logger.js';

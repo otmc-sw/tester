@@ -1,3 +1,8 @@
+/**
+ * @License Apache License 2.0
+ * @Copyright (c) 2026 OTMC Softwares.
+ * @Contributors Nguyen Van Trung, OTMC Contributors.
+ **/
 import type { APIResponse } from 'playwright';
 import type { TestExpectations, ValidationError, ValidationResult, ResponseContract } from '../core/types.js';
 import { ClassValidator } from './validator.js';
@@ -30,7 +35,6 @@ export class ResponseParser {
     const contentType = headers['content-type'] || '';
     const validationErrors: ValidationError[] = [];
 
-    // Validate status
     if (expectations?.status !== undefined && status !== expectations.status) {
       validationErrors.push({
         path: 'status',
@@ -40,7 +44,6 @@ export class ResponseParser {
       });
     }
 
-    // Validate Content-Type
     if (expectations?.contentType !== undefined && !contentType.includes(expectations.contentType)) {
       validationErrors.push({
         path: 'headers.content-type',
@@ -57,7 +60,6 @@ export class ResponseParser {
       });
     }
 
-    // Validate response time
     if (expectations?.responseTime !== undefined && duration !== undefined && duration > expectations.responseTime) {
       validationErrors.push({
         path: 'responseTime',
@@ -67,7 +69,6 @@ export class ResponseParser {
       });
     }
 
-    // Validate headers
     if (expectations?.headers) {
       for (const [key, expectedValue] of Object.entries(expectations.headers)) {
         const actualValue = headers[key.toLowerCase()];
@@ -82,7 +83,6 @@ export class ResponseParser {
       }
     }
 
-    // Parse JSON
     let responseBody: unknown;
     try {
       responseBody = await response.json();
@@ -94,7 +94,6 @@ export class ResponseParser {
       throw new Error('Response is not valid JSON');
     }
 
-    // Validate empty response
     if (responseBody === null || responseBody === undefined) {
       validationErrors.push({
         path: 'body',
@@ -102,15 +101,12 @@ export class ResponseParser {
       });
     }
 
-    // Process envelope
     const envelopeResult = this.envelopeProcessor.process<unknown>(responseBody);
     
-    // Add envelope validation errors
     if (envelopeResult.validationErrors) {
       validationErrors.push(...envelopeResult.validationErrors);
     }
 
-    // If it's an error response, return with error details
     if (envelopeResult.isError) {
       const error = new Error('API returned error response') as Error & { 
         status: number; 
@@ -151,7 +147,6 @@ export class ResponseParser {
       throw error;
     }
 
-    // Validate model against the unwrapped data
     const validator = new ClassValidator(ModelClass as new () => Record<string, unknown>);
     const validationResult: ValidationResult = validator.validate(envelopeResult.data);
     
@@ -159,7 +154,6 @@ export class ResponseParser {
       validationErrors.push(...validationResult.errors);
     }
 
-    // Map to class (handles both single objects and arrays)
     const data = ModelMapper.map(envelopeResult.data, ModelClass as new () => Record<string, unknown>) as T;
 
     return {

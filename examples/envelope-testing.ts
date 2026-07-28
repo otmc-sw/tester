@@ -1,45 +1,59 @@
+/**
+ * @License Apache License 2.0
+ * @Copyright (c) 2026 OTMC Softwares.
+ * @Contributors Nguyen Van Trung, OTMC Contributors.
+ **/
 import { createTester, api } from '@otmc/tester';
 
-// Define response model based on the actual API response
 class Route {
-  id!: number;
-  domain!: string;
-  target!: string;
-  dns_id!: number;
-  enabled!: boolean;
-  status!: string;
-  created_at!: string;
-  updated_at!: string;
+  id: number = 0;
+  domain: string = '';
+  target: string = '';
+  dns_id: number = 0;
+  enabled: boolean = false;
+  status: string = '';
+  created_at: string = '';
+  updated_at: string = '';
+  [key: string]: unknown;
+}
+
+class DNSRecord {
+  id: number = 0;
+  domain: string = '';
+  ip: string = '';
+  created_at: string = '';
+  updated_at: string = '';
   [key: string]: unknown;
 }
 
 async function main() {
-  console.log('Starting test...');
-
   const tester1 = createTester({
     baseURL: 'https://dns.c',
-    responseContract: false,
+    responseContract: {
+      success: {
+        successField: 'success',
+        dataField: 'data',
+      },
+      error: {
+        successField: 'success',
+        messageField: 'message',
+        errorField: 'error',
+      },
+    },
   });
-
-  console.log('Tester created, initializing...');
   await tester1.initialize();
-  console.log('Tester initialized');
 
-  try {
-    console.log('Calling api.GET()...');
-    const routes = await api.GET('/api/routes');
+  const routes = await api.test({
+    GET: '/api/routes',
+    response: Route,
+  });
+  console.log(routes);
 
-    console.log('Routes count:', (routes as any).length);
-    console.log('First route:', (routes as any)[0]?.domain, '->', (routes as any)[0]?.target);
-    console.log('All routes:');
-    for (const route of (routes as any)) {
-      console.log(`  ${route.domain} -> ${route.target} (${route.status})`);
-    }
-  } catch (error) {
-    console.error('Error:', error);
-  } finally {
-    await tester1.cleanup();
-  }
+  const dnsRecords = await api.test({
+    GET: '/api/dns',
+    response: DNSRecord,
+  });
+  console.log(dnsRecords);
 }
 
-main();
+main().catch(console.error);

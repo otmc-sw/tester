@@ -1,3 +1,8 @@
+/**
+ * @License Apache License 2.0
+ * @Copyright (c) 2026 OTMC Softwares.
+ * @Contributors Nguyen Van Trung, OTMC Contributors.
+ **/
 import type { ValidationResult, ValidationError } from '../core/types.js';
 
 export interface Validator<T> {
@@ -18,7 +23,6 @@ export class ClassValidator<T extends object> implements Validator<T> {
       return { isValid: false, errors };
     }
 
-    // Handle array responses
     if (Array.isArray(data)) {
       for (let i = 0; i < data.length; i++) {
         const validationResult = this.validateObject(data[i], i);
@@ -30,7 +34,6 @@ export class ClassValidator<T extends object> implements Validator<T> {
       };
     }
 
-    // Handle single object responses
     return this.validateObject(data);
   }
 
@@ -65,10 +68,13 @@ export class ClassValidator<T extends object> implements Validator<T> {
       const actualValue = dataObj[key];
       const actualType = typeof actualValue;
 
+      if (expectedType === 'undefined') {
+        continue;
+      }
+
       if (
         actualValue !== null &&
         actualValue !== undefined &&
-        expectedType !== 'undefined' &&
         actualType !== expectedType
       ) {
         errors.push({

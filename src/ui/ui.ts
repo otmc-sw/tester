@@ -1,3 +1,8 @@
+/**
+ * @License Apache License 2.0
+ * @Copyright (c) 2026 OTMC Softwares.
+ * @Contributors Nguyen Van Trung, OTMC Contributors.
+ **/
 import { UiClient, PageObject } from './client.js';
 
 let currentClient: UiClient | null = null;

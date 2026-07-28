@@ -1,3 +1,8 @@
+/**
+ * @License Apache License 2.0
+ * @Copyright (c) 2026 OTMC Softwares.
+ * @Contributors Nguyen Van Trung, OTMC Contributors.
+ **/
 import type { TestResult, TestConfig } from '../core/types.js';
 import type { Reporter } from '../core/reporter.js';
 import type { ApiClient } from '../api/client.js';
@@ -71,7 +76,6 @@ export class TestRunner {
       }
 
       if (config.expect?.status) {
-        // Status validation would be done here
       }
 
       const result: TestResult = {

@@ -1,3 +1,8 @@
+/**
+ * @License Apache License 2.0
+ * @Copyright (c) 2026 OTMC Softwares.
+ * @Contributors Nguyen Van Trung, OTMC Contributors.
+ **/
 export { createTester, Tester } from './core/tester.js';
 export { api } from './api/api.js';
 export { ui, uiWait, uiKeyboard, uiNavigation, uiExpect } from './ui/ui.js';

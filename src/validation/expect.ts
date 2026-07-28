@@ -1,3 +1,8 @@
+/**
+ * @License Apache License 2.0
+ * @Copyright (c) 2026 OTMC Softwares.
+ * @Contributors Nguyen Van Trung, OTMC Contributors.
+ **/
 import type { Logger } from '../core/logger.js';
 
 export class Expectation<T> {
@@ -20,8 +25,6 @@ export class Expectation<T> {
   }
 
   schema(schema: unknown): this {
-    // Zod schema validation would go here
-    // For now, we'll do basic type checking
     if (typeof this.value !== 'object' || this.value === null) {
       throw new Error('Value must be an object for schema validation');
     }

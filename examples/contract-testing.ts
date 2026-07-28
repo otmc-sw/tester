@@ -1,6 +1,10 @@
+/**
+ * @License Apache License 2.0
+ * @Copyright (c) 2026 OTMC Softwares.
+ * @Contributors Nguyen Van Trung, OTMC Contributors.
+ **/
 import { createTester, api } from '@otmc/tester';
 
-// Define response models as TypeScript classes
 class User {
   id!: string;
   username!: string;
@@ -30,7 +34,6 @@ async function main() {
   await tester.initialize();
 
   try {
-    // Example 1: Regular contract syntax
     const user1 = await api.test({
       method: 'POST',
       url: '/users',
@@ -44,7 +47,6 @@ async function main() {
 
     console.log('Created user:', user1.username);
 
-    // Example 2: Shorthand syntax
     const user2 = await api.test({
       POST: '/users',
       request: {
@@ -57,7 +59,6 @@ async function main() {
 
     console.log('Created user:', user2.username);
 
-    // Example 3: With custom expectations
     const user3 = await api.test({
       POST: '/users',
       request: {
@@ -77,7 +78,6 @@ async function main() {
 
     console.log('Created user:', user3.username);
 
-    // Example 4: GET request
     const users = await api.test({
       GET: '/users',
       response: User,
@@ -85,7 +85,6 @@ async function main() {
 
     console.log('Fetched users:', users.length);
 
-    // Example 5: PUT request
     const updatedUser = await api.test({
       PUT: '/users/1',
       request: {
@@ -99,7 +98,6 @@ async function main() {
 
     console.log('Updated user:', updatedUser.email);
 
-    // Example 6: DELETE request
     await api.test({
       DELETE: '/users/1',
       response: class Empty { [key: string]: unknown },

@@ -1,3 +1,8 @@
+/**
+ * @License Apache License 2.0
+ * @Copyright (c) 2026 OTMC Softwares.
+ * @Contributors Nguyen Van Trung, OTMC Contributors.
+ **/
 import { chromium, type Browser, type BrowserContext, type APIRequestContext } from 'playwright';
 import type { TesterConfig } from './types.js';
 import { ApiClient } from '../api/client.js';
@@ -48,7 +53,6 @@ export class Tester {
 
     this.apiRequestContext = await this.api.initialize();
     
-    // Wire up global singletons
     setApiClient(this.api);
     setUiClient(this.ui);
     setRunner(this.testRunner);

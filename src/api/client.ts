@@ -1,3 +1,8 @@
+/**
+ * @License Apache License 2.0
+ * @Copyright (c) 2026 OTMC Softwares.
+ * @Contributors Nguyen Van Trung, OTMC Contributors.
+ **/
 import type { APIRequestContext } from 'playwright';
 import { request } from 'playwright';
 import type {
@@ -49,9 +54,6 @@ export class ApiClient {
     this.context = undefined;
   }
 
-  /**
-   * Hàm core thực thi HTTP request, tính toán duration, log thông tin và xử lý lỗi tập trung.
-   */
   private async executeRequest<T>(options: RequestOptions): Promise<T> {
     if (!this.context) {
       const err = new Error('API client not initialized. Call initialize() first.');
@@ -64,7 +66,6 @@ export class ApiClient {
     const startTime = Date.now();
     const mergedHeaders = { ...this.auth.getHeaders(), ...headers };
 
-    // Log Request
     this.logger.logRequest({
       method,
       url: fullUrl,
@@ -84,7 +85,6 @@ export class ApiClient {
       const responseHeaders = response.headers() as Record<string, string>;
       const responseBody = await response.json().catch(() => null);
 
-      // Log Response
       this.logger.logResponse({
         status: response.status(),
         headers: responseHeaders,
@@ -93,7 +93,6 @@ export class ApiClient {
         timestamp: Date.now(),
       });
 
-      // Kiểm tra validation với ResponseParser nếu có Contract
       if (contractResponseModel || expectations) {
         const parsed = await this.responseParser.parse(
           response,
@@ -105,7 +104,7 @@ export class ApiClient {
         if (parsed.validationErrors.length > 0) {
           const apiError: ApiError = {
             name: 'ApiError',
-            message: `Response validation failed for [${method}] ${fullUrl}`,
+            message: `Response validation failed for [${method}] ${fullUrl} | validationErrors: ${JSON.stringify(parsed.validationErrors)}`,
             status: parsed.status,
             url: fullUrl,
             headers: parsed.headers,
@@ -114,15 +113,12 @@ export class ApiClient {
             duration: parsed.duration,
             validationErrors: parsed.validationErrors,
           };
-
-          this.printError('Validation Failure', apiError);
           throw apiError;
         }
 
         return parsed.data as T;
       }
 
-      // Xử lý request thông thường không có contract
       if (!response.ok()) {
         const apiError: ApiError = {
           name: 'ApiError',
@@ -134,8 +130,6 @@ export class ApiClient {
           response: responseBody,
           duration,
         };
-
-        this.printError('HTTP Request Error', apiError);
         throw apiError;
       }
 
@@ -144,52 +138,44 @@ export class ApiClient {
       const duration = Date.now() - startTime;
 
       if (error instanceof Error && 'status' in error) {
-        throw error;
+        const raw = error as any;
+        const payload = {
+          message: raw.message,
+          status: raw.status,
+          name: raw.name,
+          stack: raw.stack,
+          response: raw.response,
+          validationErrors: raw.validationErrors,
+          cause: raw.cause instanceof Error ? raw.cause.message : raw.cause,
+          toString: `${raw}`,
+        };
+        const apiError: ApiError = {
+          name: 'ApiError',
+          message: [payload.message, payload.status ? `status:${payload.status}` : '', `name:${payload.name}`].filter(Boolean).join(' | ') || 'Unknown error',
+          status: typeof raw.status === 'number' ? raw.status : 0,
+          url: fullUrl,
+          headers: mergedHeaders,
+          request: body,
+          response: raw.response ?? String(raw),
+          duration,
+        };
+        throw apiError;
       }
 
       const raw = (error as any) ?? {};
       const rawText = raw?.message ?? raw?.text ?? raw?.errorText ?? raw;
-      const reason = typeof rawText === 'string' ? rawText : undefined;
+      const reason = typeof rawText === 'string' ? rawText : 'Unknown Network/System Error';
       const apiError: ApiError = {
         name: 'ApiError',
-        message: reason || 'Unknown Network/System Error',
+        message: reason,
         status: (raw as any).status ?? 0,
         url: fullUrl,
         headers: mergedHeaders,
         request: body,
         duration,
+        response: raw,
       };
-
-      this.printError('Execution Error', apiError);
       throw apiError;
-    }
-  }
-
-  /**
-   * Helper in chi tiết lỗi ra Logger/Console để debug nhanh chóng.
-   */
-  private printError(type: string, error: ApiError): void {
-    const errorDetails = [
-      `==================== [ API CLIENT ERROR ] ====================`,
-      `Type:        ${type}`,
-      `Message:     ${error.message}`,
-      `URL:         ${error.url}`,
-      `Status:      ${error.status}`,
-      `Duration:    ${error.duration}ms`,
-      `Request:     ${JSON.stringify(error.request ?? null, null, 2)}`,
-      `Response:    ${JSON.stringify(error.response ?? null, null, 2)}`,
-      error.validationErrors?.length
-        ? `Validation Errors:\n${JSON.stringify(error.validationErrors, null, 2)}`
-        : null,
-      `==============================================================`,
-    ]
-      .filter(Boolean)
-      .join('\n');
-
-    if (typeof this.logger.logError === 'function') {
-      this.logger.logError(errorDetails);
-    } else {
-      console.error(errorDetails);
     }
   }
 
@@ -202,7 +188,6 @@ export class ApiClient {
     return this.executeRequest<T>({ method, url, body, headers });
   }
 
-  // --- HTTP Methods Shortcut ---
   async GET<T>(url: string, headers?: Record<string, string>): Promise<T> {
     return this.makeRequest<T>('GET', url, undefined, headers);
   }
@@ -231,7 +216,6 @@ export class ApiClient {
     await this.makeRequest<void>('OPTIONS', url, undefined, headers);
   }
 
-  // --- Auth & Resource ---
   resource<T>(basePath: string): ResourceApi<T> {
     return new ResourceApi<T>(basePath, this);
   }
@@ -244,7 +228,6 @@ export class ApiClient {
     this.auth.setToken(token);
   }
 
-  // --- Contract Test API ---
   async test<TReq, TRes extends object>(contract: TestContract<TReq, TRes>): Promise<TRes>;
   async test<TReq, TRes extends object>(contract: ShorthandTestContract<TReq, TRes>): Promise<TRes>;
   async test<TReq, TRes extends object>(
