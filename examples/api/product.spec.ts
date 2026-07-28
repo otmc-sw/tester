@@ -9,7 +9,6 @@ import { Product, CreateProductRequest, UpdateProductRequest } from '../types.js
 import config from '../config.js';
 
 const suite = defineAPIs([
-  // GET - List all products
   {
     title: "List all products",
     GET: "/products",
@@ -17,7 +16,6 @@ const suite = defineAPIs([
     status: 200
   },
 
-  // GET - List products with pagination
   {
     title: "List with pagination",
     GET: "/products?page=1&limit=20",
@@ -25,7 +23,6 @@ const suite = defineAPIs([
     status: 200
   },
 
-  // GET - Filter products by category
   {
     title: "Filter by category",
     GET: "/products?category=electronics",
@@ -33,7 +30,6 @@ const suite = defineAPIs([
     status: 200
   },
 
-  // GET - Filter products by price range
   {
     title: "Filter by price range",
     GET: "/products?minPrice=100&maxPrice=1000",
@@ -41,7 +37,6 @@ const suite = defineAPIs([
     status: 200
   },
 
-  // GET - Search products by name
   {
     title: "Search by name",
     GET: "/products?search=laptop",
@@ -49,7 +44,6 @@ const suite = defineAPIs([
     status: 200
   },
 
-  // GET - Get active products only
   {
     title: "Get active products only",
     GET: "/products?isActive=true",
@@ -57,7 +51,6 @@ const suite = defineAPIs([
     status: 200
   },
 
-  // POST - Create new product
   {
     title: "Create new product",
     POST: "/products",
@@ -72,7 +65,6 @@ const suite = defineAPIs([
     status: 201
   },
 
-  // POST - Create product with invalid data
   {
     title: "Create with negative price",
     POST: "/products",
@@ -108,7 +100,6 @@ const suite = defineAPIs([
     status: 201
   },
 
-  // GET - Get product by ID
   {
     title: "Get by ID",
     GET: "/products/1",
@@ -122,7 +113,6 @@ const suite = defineAPIs([
     status: 404
   },
 
-  // PUT - Update product completely
   {
     title: "Full update",
     PUT: "/products/1",
@@ -138,7 +128,6 @@ const suite = defineAPIs([
     status: 200
   },
 
-  // PATCH - Update product partially
   {
     title: "Partial update - Price only",
     PATCH: "/products/1",
@@ -169,7 +158,6 @@ const suite = defineAPIs([
     status: 200
   },
 
-  // DELETE - Delete product
   {
     title: "Delete product",
     DELETE: "/products/3",
@@ -182,7 +170,6 @@ const suite = defineAPIs([
     status: 404
   },
 
-  // POST - Bulk update stock
   {
     title: "Bulk stock update",
     POST: "/products/bulk/stock",
@@ -195,7 +182,6 @@ const suite = defineAPIs([
     status: 200
   },
 
-  // GET - Get product statistics
   {
     title: "Get statistics",
     GET: "/products/statistics",

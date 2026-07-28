@@ -9,7 +9,6 @@ import { User, CreateUserRequest, UpdateUserRequest } from '../types.js';
 import config from '../config.js';
 
 const suite = defineAPIs([
-  // GET - List all users
   {
     title: "List Users - Get all users",
     GET: "/users",
@@ -17,7 +16,6 @@ const suite = defineAPIs([
     status: 200
   },
 
-  // GET - List users with pagination
   {
     title: "List Users - With pagination",
     GET: "/users?page=1&limit=10",
@@ -25,7 +23,6 @@ const suite = defineAPIs([
     status: 200
   },
 
-  // GET - List users filtered by role
   {
     title: "List Users - Filter by role",
     GET: "/users?role=admin",
@@ -33,7 +30,6 @@ const suite = defineAPIs([
     status: 200
   },
 
-  // POST - Create new user
   {
     title: "Create User - Create admin user",
     POST: "/users",
@@ -60,7 +56,6 @@ const suite = defineAPIs([
     status: 201
   },
 
-  // POST - Create user with invalid data (should fail)
   {
     title: "Create User - Invalid email format",
     POST: "/users",
@@ -81,7 +76,6 @@ const suite = defineAPIs([
     status: 400
   },
 
-  // GET - Get user by ID
   {
     title: "Get User - By ID",
     GET: "/users/1",
@@ -95,7 +89,6 @@ const suite = defineAPIs([
     status: 404
   },
 
-  // PUT - Update user completely
   {
     title: "Update User - Full update",
     PUT: "/users/1",
@@ -109,7 +102,6 @@ const suite = defineAPIs([
     status: 200
   },
 
-  // PATCH - Update user partially
   {
     title: "Update User - Partial update - Email only",
     PATCH: "/users/1",
@@ -130,7 +122,6 @@ const suite = defineAPIs([
     status: 200
   },
 
-  // DELETE - Delete user
   {
     title: "Delete User - Soft delete",
     DELETE: "/users/2",

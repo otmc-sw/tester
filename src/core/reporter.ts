@@ -68,7 +68,6 @@ export class Reporter implements IReporter {
   }
 
   onSuiteComplete(): void {
-    // Hook for suite completion - can be used for final reporting
   }
 
   getLogs(): Array<{
@@ -88,7 +87,6 @@ export class Reporter implements IReporter {
     return this.testResults;
   }
 
-  // Legacy methods for backward compatibility
   addResult(result: { name: string; status: 'passed' | 'failed' | 'skipped'; duration: number; error?: Error }): void {
     this.testResults.push({
       title: result.name,
@@ -99,7 +97,5 @@ export class Reporter implements IReporter {
   }
 
   async generate(): Promise<void> {
-    // Legacy method - now just a no-op since Playwright handles reporting
-    // Future: can be used to generate custom reports from logs and testResults
   }
 }

@@ -22,18 +22,12 @@ export type TestFunction = (
   options?: { location?: Location }
 ) => void;
 
-/**
- * Khởi tạo Executor và Reporter từ API Suite config.
- */
 export function createExecutor(suite: APISuite): { executor: Executor; reporter: Reporter } {
   const reporter = new Reporter();
   const executor = new Executor(reporter, suite.config.response);
   return { executor, reporter };
 }
 
-/**
- * Helper thực thi 1 test case, đo thời gian bằng `performance.now()` và báo cáo kết quả.
- */
 async function executeTestCase(
   executor: Executor,
   reporter: Reporter,
@@ -59,25 +53,6 @@ async function executeTestCase(
   }
 }
 
-/**
- * Tạo danh sách test cases sử dụng trong Playwright spec files.
- *
- * @example
- * import { test } from '@playwright/test';
- * import { defineAPIs, createTestCases } from '../../src/index.js';
- *
- * const suite = defineAPIs([...], config);
- *
- * test.describe('Products', () => {
- * const { setup, testCases } = createTestCases(suite);
- * setup(test);
- * for (const tc of testCases) {
- * test(tc.title, async ({ request }) => {
- * await tc.execute(request);
- * });
- * }
- * });
- */
 export function createTestCases(suite: APISuite) {
   const { executor, reporter } = createExecutor(suite);
 
@@ -104,9 +79,6 @@ export function createTestCases(suite: APISuite) {
 }
 
 
-/**
- * Trích xuất vị trí gọi hàm từ Stack trace (bỏ qua các file runner nội bộ).
- */
 function getCallerLocation(): Location {
   const stack = new Error().stack;
   if (!stack) return { file: '', line: 0, column: 0 };
@@ -140,7 +112,6 @@ function runTests(
 ): void {
   const location = callerLocation || getCallerLocation();
 
-  // Reset database
   testFn(
     'Setup: Reset database',
     async ({ request }) => {
@@ -149,7 +120,6 @@ function runTests(
     { location }
   );
 
-  // Chạy từng test case
   for (const testCase of suite.tests) {
     const normalized = normalize(testCase);
     testFn(
@@ -164,10 +134,6 @@ function runTests(
   reporter.onSuiteComplete();
 }
 
-/**
- * @deprecated Sử dụng `createTestRunner()` hoặc `createTestCases()` để đảm bảo
- * hiển thị chính xác vị trí file trong Playwright report.
- */
 export function run(
   suite: APISuite,
   testFn: TestFunction,

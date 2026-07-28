@@ -19,14 +19,9 @@ export async function beforeAll(
   options: BeforeAllOptions = {}
 ): Promise<void> {
   if (options.baseURL) {
-    // Configure base URL for the request context
-    // Note: Playwright's APIRequestContext doesn't have a direct baseURL setter
-    // This is a placeholder for future implementation
   }
   
   if (options.extraHTTPHeaders) {
-    // Set default headers
-    // Note: This would need to be implemented based on actual Playwright API
   }
 }
 

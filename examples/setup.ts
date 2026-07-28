@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @License OTMC License
  * @Copyright (c) 2026 OTMC Softwares. All rights reserved.
  * @Contributors Nguyen Van Trung, OTMC Authors.
@@ -10,13 +10,11 @@ import path from 'path';
 export default async function globalSetup(config: FullConfig) {
   const baseURL = config.projects[0].use.baseURL || 'http://localhost:3000';
   
-  // Ensure data directory exists
   const dataDir = path.join(process.cwd(), 'data');
   if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
   }
   
-  // Reset database from template
   const templatePath = path.join(process.cwd(), 'db.template.json');
   const dbPath = path.join(dataDir, 'data.json');
   

@@ -4,7 +4,6 @@
  * @Contributors Nguyen Van Trung, OTMC Contributors.
  **/
 
-// User related types
 export class User {
   id!: string;
   username!: string;
@@ -27,7 +26,6 @@ export interface UpdateUserRequest {
   role?: 'admin' | 'user' | 'moderator';
 }
 
-// Authentication types
 export interface LoginRequest {
   username: string;
   password: string;
@@ -49,7 +47,6 @@ export interface RefreshTokenResponse {
   expiresIn: number;
 }
 
-// Product related types
 export class Product {
   id!: string;
   name!: string;
@@ -79,7 +76,6 @@ export interface UpdateProductRequest {
   isActive?: boolean;
 }
 
-// Order related types
 export interface Order {
   id: string;
   userId: string;
@@ -103,7 +99,6 @@ export interface CreateOrderRequest {
   }[];
 }
 
-// API Response envelope types
 export interface SuccessResponse<T> {
   success: true;
   message: string;

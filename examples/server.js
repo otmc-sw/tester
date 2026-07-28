@@ -10,14 +10,11 @@ const path = require('path');
 const app = express();
 const PORT = 3000;
 
-// Middleware
 app.use(express.json());
 
-// Load initial data
 const dbPath = path.join(__dirname, 'data', 'data.json');
 const templatePath = path.join(__dirname, 'db.template.json');
 
-// Ensure data directory exists and copy template if needed
 const dataDir = path.join(__dirname, 'data');
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
@@ -28,21 +25,17 @@ if (!fs.existsSync(dbPath)) {
 
 let db = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
 
-// Helper function to save data
 const saveData = () => {
   fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
 };
 
-// Helper function to generate ID
 const generateId = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
 
-// Helper function to validate email
 const isValidEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
 
-// Helper function to validate product
 const validateProduct = (product) => {
   if (!product.name || typeof product.name !== 'string') {
     return { valid: false, message: 'Name is required' };
@@ -68,7 +61,6 @@ const validateProduct = (product) => {
   return { valid: true };
 };
 
-// Helper function to validate user
 const validateUser = (user) => {
   if (!user.username || typeof user.username !== 'string') {
     return { valid: false, message: 'Username is required' };
@@ -85,17 +77,14 @@ const validateUser = (user) => {
   return { valid: true };
 };
 
-// Helper function to send success response
 const sendSuccess = (res, data, message = 'Success', statusCode = 200) => {
   res.status(statusCode).json({ success: true, message, data });
 };
 
-// Helper function to send error response
 const sendError = (res, message, statusCode = 400, error = null) => {
   res.status(statusCode).json({ success: false, message, error });
 };
 
-// Reset database endpoint
 app.post('/reset-db', (req, res) => {
   try {
     const templateData = JSON.parse(fs.readFileSync(templatePath, 'utf8'));
@@ -107,16 +96,13 @@ app.post('/reset-db', (req, res) => {
   }
 });
 
-// USERS endpoints
 app.get('/users', (req, res) => {
   let users = [...db.users];
   
-  // Filter by role
   if (req.query.role) {
     users = users.filter(u => u.role === req.query.role);
   }
   
-  // Pagination
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || users.length;
   const start = (page - 1) * limit;
@@ -180,7 +166,6 @@ app.patch('/users/:id', (req, res) => {
     return sendError(res, 'User not found', 404);
   }
   
-  // Partial validation - only validate fields being provided
   if (req.body.email && !isValidEmail(req.body.email)) {
     return sendError(res, 'Invalid email format', 400);
   }
@@ -207,16 +192,13 @@ app.delete('/users/:id', (req, res) => {
   res.status(204).send();
 });
 
-// PRODUCTS endpoints
 app.get('/products', (req, res) => {
   let products = [...db.products];
   
-  // Filter by category
   if (req.query.category) {
     products = products.filter(p => p.category === req.query.category);
   }
   
-  // Filter by price range
   if (req.query.minPrice) {
     products = products.filter(p => p.price >= parseFloat(req.query.minPrice));
   }
@@ -224,20 +206,17 @@ app.get('/products', (req, res) => {
     products = products.filter(p => p.price <= parseFloat(req.query.maxPrice));
   }
   
-  // Search by name
   if (req.query.search) {
     products = products.filter(p => 
       p.name.toLowerCase().includes(req.query.search.toLowerCase())
     );
   }
   
-  // Filter by active status
   if (req.query.isActive !== undefined) {
     const isActive = req.query.isActive === 'true';
     products = products.filter(p => p.isActive === isActive);
   }
   
-  // Pagination
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || products.length;
   const start = (page - 1) * limit;
@@ -348,12 +327,10 @@ app.patch('/products/:id', (req, res) => {
     return sendError(res, 'Product not found', 404);
   }
   
-  // Validate price if provided
   if (req.body.price !== undefined && (typeof req.body.price !== 'number' || req.body.price < 0)) {
     return sendError(res, 'Price must be a non-negative number', 400);
   }
   
-  // Validate stock if provided
   if (req.body.stock !== undefined && (typeof req.body.stock !== 'number' || req.body.stock < 0)) {
     return sendError(res, 'Stock must be a non-negative number', 400);
   }
@@ -380,7 +357,6 @@ app.delete('/products/:id', (req, res) => {
   res.status(204).send();
 });
 
-// Start server
 app.listen(PORT, () => {
   console.log(`Mock API server running on http://localhost:${PORT}`);
 });
