@@ -1,0 +1,105 @@
+{
+  "users": [
+    {
+      "username": "updated_admin",
+      "email": "new_email@example.com",
+      "role": "moderator",
+      "id": "1"
+    },
+    {
+      "username": "admin_user",
+      "email": "admin@example.com",
+      "password": "SecurePass123!",
+      "role": "admin",
+      "id": "cd11Q0o"
+    },
+    {
+      "username": "regular_user",
+      "email": "user@example.com",
+      "password": "UserPass123!",
+      "role": "user",
+      "id": "oJrYm2a"
+    },
+    {
+      "username": "bad_user",
+      "email": "invalid-email",
+      "password": "Pass123!",
+      "id": "T_8aTIT"
+    },
+    {
+      "username": "incomplete_user",
+      "id": "Lu1WNFp"
+    },
+    {
+      "username": "admin_user",
+      "email": "admin@example.com",
+      "password": "SecurePass123!",
+      "role": "admin",
+      "id": "jyfF-lg"
+    },
+    {
+      "username": "regular_user",
+      "email": "user@example.com",
+      "password": "UserPass123!",
+      "role": "user",
+      "id": "zmUNe23"
+    },
+    {
+      "username": "bad_user",
+      "email": "invalid-email",
+      "password": "Pass123!",
+      "id": "rlk_IeZ"
+    },
+    {
+      "username": "incomplete_user",
+      "id": "BHczL-V"
+    }
+  ],
+  "products": [
+    {
+      "name": "Updated Laptop Pro 15",
+      "description": "Updated description with better specs",
+      "price": 1099.99,
+      "stock": 40,
+      "category": "electronics",
+      "isActive": false,
+      "id": "1"
+    },
+    {
+      "name": "Laptop Pro 15",
+      "description": "High-performance laptop with 16GB RAM",
+      "price": 1299.99,
+      "stock": 50,
+      "category": "electronics",
+      "id": "TDHa_NE"
+    },
+    {
+      "name": "Invalid Product",
+      "description": "Product with negative price",
+      "price": -100,
+      "stock": 10,
+      "category": "electronics",
+      "id": "sUQ1Ria"
+    },
+    {
+      "name": "Incomplete Product",
+      "id": "UJVatiU"
+    },
+    {
+      "name": "Laptop Pro 15",
+      "description": "High-performance laptop with 16GB RAM",
+      "price": 1299.99,
+      "stock": 50,
+      "category": "electronics",
+      "id": "EMpNKVo"
+    },
+    {
+      "name": "Invalid Product",
+      "description": "Product with negative price",
+      "price": -100,
+      "stock": 10,
+      "category": "electronics",
+      "id": "bA4GGnS"
+    }
+  ]
+}

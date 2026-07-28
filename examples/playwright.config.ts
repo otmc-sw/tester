@@ -13,7 +13,7 @@ export default defineConfig({
   reporter: 'list',
   globalSetup: './setup.ts',
   use: {
-    baseURL: 'http://localhost:5005',
+    baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
   },
 

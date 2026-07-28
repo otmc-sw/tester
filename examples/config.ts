@@ -3,10 +3,10 @@
  * @Copyright (c) 2026 OTMC Softwares.
  * @Contributors Nguyen Van Trung, OTMC Contributors.
  **/
-import { defineConfig } from '@otmc/tester';
+import { defineConfig } from '../src/index.js';
 
 export default defineConfig({
-  baseURL: 'https://api.example.com',
+  baseURL: 'http://localhost:3000',
   response: {
     success: {
       successField: 'success',
