@@ -96,7 +96,6 @@ export class ResponseEnvelopeProcessor {
       });
     }
 
-    // Validate message field exists
     if (!(messageField in response)) {
       validationErrors.push({
         path: messageField,
@@ -139,7 +138,6 @@ export class ResponseEnvelopeProcessor {
       });
     }
 
-    // Validate message field exists
     if (!(messageField in response)) {
       validationErrors.push({
         path: messageField,

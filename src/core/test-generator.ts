@@ -64,21 +64,17 @@ const envelopeProcessor = new ResponseEnvelopeProcessor(${contractConfig});`;
 
     testBody += `);
 
-  // Validate HTTP Status
   const status = response.status();
   ${hasExpectedStatus ? `expect(status).toBe(${testCase.status});` : `expect(status).toBeGreaterThanOrEqual(200); expect(status).toBeLessThan(300);`}
 
-  // Validate Content-Type
   const contentType = response.headers()['content-type'];
   expect(contentType).toMatch(/application\\/json/);
 
-  // Parse JSON response
   const json = await response.json();`;
 
     if (hasResponseModel) {
       testBody += `
 
-  // Validate response contract
   const envelopeResult = envelopeProcessor.process(json);
   
   if (envelopeResult.isError) {
@@ -90,7 +86,6 @@ const envelopeProcessor = new ResponseEnvelopeProcessor(${contractConfig});`;
     throw new Error(\`Validation failed: \${JSON.stringify(envelopeResult.validationErrors)}\`);
   }
 
-  // Return unwrapped data
   return envelopeResult.data;`;
     }
 
