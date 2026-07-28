@@ -37,7 +37,7 @@ export class ApiClient {
     this.config = config;
     this.logger = logger;
     this.auth = new AuthenticationManager(config, logger);
-    this.responseParser = new ResponseParser(config.responseContract);
+    this.responseParser = new ResponseParser(config.response);
   }
 
   async initialize(): Promise<APIRequestContext> {

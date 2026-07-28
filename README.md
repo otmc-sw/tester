@@ -1,6 +1,23 @@
 # @otmc/tester
 
-A modern, type-safe testing library built on top of Playwright that provides a clean developer experience for API and UI testing.
+`@otmc/tester` is **NOT** a replacement for Playwright.
+
+Playwright remains responsible for:
+
+- HTTP transport
+- Browser automation
+- Parallel execution
+- Retry
+- Fixtures
+- Reporting
+- Trace
+- Screenshots
+
+`@otmc/tester` only provides a clean, type-safe DSL for defining API test cases.
+
+The developer should describe **what** to test.
+
+The framework should decide **how** to execute it.
 
 ## Features
 
@@ -8,12 +25,9 @@ A modern, type-safe testing library built on top of Playwright that provides a c
 - **Minimal API**: Clean, intuitive interface that hides Playwright complexity
 - **Zero Boilerplate**: Convention over configuration - focus on business logic
 - **API Testing**: Support for all HTTP methods, authentication, validation
-- **UI Testing**: Simplified browser automation with page objects
-- **Resource API**: Automatic CRUD operations for REST resources
-- **Authentication**: Built-in support for JWT, Bearer, Basic, OAuth2, API Key
-- **Validation**: Status codes, schemas, headers, response time
-- **Reporting**: Automatic HTML, JSON, and JUnit report generation
-- **Logging**: Comprehensive request/response/browser logging
+- **Automatic Validation**: HTTP Status, JSON parsing, Success/Error Response Contract, Content-Type, Required fields, Field types, Missing properties, Response mapping
+- **Response Mapping**: Automatic unwrapping of response envelopes
+- **Error Handling**: Typed ApiError with detailed error information
 
 ## Installation
 
@@ -23,429 +37,446 @@ npm install @otmc/tester
 
 ## Quick Start
 
-```typescript
-import { createTester, api, ui, test, expect } from '@otmc/tester';
+### Project Configuration
 
-const tester = createTester({
-  baseURL: 'https://api.example.com',
-  browser: 'chromium',
-  headless: true,
-});
-
-await tester.initialize();
-
-// API Testing
-const user = await api.POST<CreateUserRequest, User>('/users', {
-  username: 'john',
-  password: 'secret',
-});
-
-// UI Testing
-await ui.goto('/login');
-await ui.input('#username', 'admin');
-await ui.input('#password', '123456');
-await ui.click('Login');
-
-await tester.cleanup();
-```
-
-## API Testing
-
-### Contract-Based Testing
-
-The framework supports contract-based testing where you define the expected response model and the framework automatically handles validation, deserialization, and error reporting.
+Every project configures the response contract only once.
 
 ```typescript
-class User {
-  id!: string;
-  username!: string;
-  email!: string;
-}
+import { defineConfig } from "@otmc/tester";
 
-// Regular syntax
-const user = await api.test({
-  method: 'POST',
-  url: '/users',
-  request: {
-    username: 'john',
-    email: 'john@example.com',
-  },
-  response: User,
+export default defineConfig({
+    baseURL: "http://localhost:5004",
+    response: {
+        success: {
+            successField: "success",
+            messageField: "message",
+            dataField: "data"
+        },
+        error: {
+            successField: "success",
+            messageField: "message",
+            errorField: "error"
+        }
+    }
 });
-
-// Shorthand syntax
-const user = await api.test({
-  POST: '/users',
-  request: {
-    username: 'john',
-    email: 'john@example.com',
-  },
-  response: User,
-});
-
-// With custom expectations
-const user = await api.test({
-  POST: '/users',
-  request: body,
-  response: User,
-  expect: {
-    status: 201,
-    responseTime: 500,
-    headers: {
-      'cache-control': 'no-store',
-    },
-  },
-});
-
-console.log(user.username); // Fully typed
 ```
 
-The framework automatically:
-- Validates HTTP status (defaults: 200 for GET/PUT/PATCH, 201 for POST, 204 for DELETE)
-- Validates Content-Type header
-- Parses JSON response
-- Deserializes into the expected model
-- Validates required fields and types
-- Measures response time
-- Logs request/response
-- Throws descriptive `ApiError` with validation details on failure
+The above configuration is also the default.
 
-### Response Envelopes
+Therefore most projects only need:
 
-Most REST APIs wrap responses in a success/error envelope. The framework automatically handles unwrapping these envelopes.
+```typescript
+export default defineConfig({
+    baseURL: "http://localhost:5004"
+});
+```
 
-**Default Envelope**
-
-By default, the framework expects this structure:
+### Default Success Response
 
 ```json
 {
-  "success": true,
-  "message": "Operation completed successfully.",
-  "data": { ... }
+    "success": true,
+    "message": "Created successfully.",
+    "data": {
+
+    }
 }
 ```
 
 The framework automatically:
-- Validates `success == true`
-- Validates `message` exists
-- Validates `data` exists
-- Unwraps and deserializes `data` into your model
 
-You receive only the business object, not the envelope.
+- verify success == true
+- verify message exists
+- verify data exists
+- unwrap data
+- map data into the expected response model
 
-**Custom Envelope**
+### Default Error Response
 
-Configure a custom envelope structure:
+```json
+{
+    "success": false,
+    "message": "Request failed.",
+    "error": {
+
+        "code": 400,
+
+        "key": "BAD_REQUEST",
+
+        "type": "Bad Request",
+
+        "summary": "Request Failed",
+
+        "detail": "sql: no rows in result set",
+
+        "file": "base.go",
+
+        "line": 66,
+
+        "function": "GetObjectByID",
+
+        "timestamp": "2026-07-24T11:43:34+07:00"
+
+    }
+}
+```
+
+The framework automatically parses the error response and throws a typed `ApiError`.
+
+## API Test Case Definition
+
+Developers define API test cases only.
 
 ```typescript
-const tester = createTester({
-  baseURL: 'https://api.example.com',
-  responseContract: {
-    success: {
-      successField: 'ok',
-      messageField: 'message',
-      dataField: 'result',
+import { defineAPIs } from "@otmc/tester";
+
+export default defineAPIs([
+
+    {
+
+        title: "Create User",
+
+        POST: "/users",
+
+        request: {
+
+            username: "admin",
+
+            password: "123456"
+
+        },
+
+        response: User
+
     },
-    error: {
-      successField: 'ok',
-      messageField: 'message',
-      errorField: 'exception',
+
+    {
+
+        title: "Get User",
+
+        GET: "/users/1",
+
+        response: User
+
     },
-  },
-});
+
+    {
+
+        title: "Delete User",
+
+        DELETE: "/users/1"
+
+    }
+
+]);
 ```
 
-**Disable Envelope**
+No Playwright code is required.
 
-For APIs that return plain JSON:
+### Test Case Properties
+
+Required:
+
+- title
+- method (or GET, POST, PUT, PATCH, DELETE)
+- url
+
+Optional:
+
+- request
+- response
+- success
+- error
+- status
+- headers
+- query
+- auth
+
+### Example
 
 ```typescript
-const tester = createTester({
-  baseURL: 'https://api.example.com',
-  responseContract: false,
-});
-```
+{
 
-**Error Handling**
+    title: "Create User",
 
-Error responses are automatically parsed and thrown as `ApiError` with detailed fields:
+    POST: "/users",
 
-```typescript
-try {
-  await api.test({ POST: '/users', request: body, response: User });
-} catch (error) {
-  if (error instanceof Error && error.name === 'ApiError') {
-    console.error(error.code);      // Error code
-    console.error(error.key);       // Error key
-    console.error(error.type);      // Error type
-    console.error(error.summary);   // Error summary
-    console.error(error.detail);    // Error detail
-    console.error(error.file);      // Source file
-    console.error(error.line);      // Source line
-    console.error(error.function); // Source function
-    console.error(error.timestamp); // Error timestamp
-  }
+    request: {
+
+        username: "admin",
+
+        password: "123456"
+
+    },
+
+    response: User,
+
+    status: 201
+
 }
 ```
 
-### HTTP Methods
+### Response Mapping
 
-```typescript
-// GET
-const users = await api.GET<User[]>('/users');
+Suppose the server returns:
 
-// POST
-const user = await api.POST<CreateUserRequest, User>('/users', body);
+```json
+{
+    "success": true,
+    "message": "Created",
+    "data": {
 
-// PUT
-const updated = await api.PUT<UpdateUserRequest, User>('/users/1', body);
+        "id": "1",
 
-// PATCH
-const patched = await api.PATCH<PatchUserRequest, User>('/users/1', body);
+        "username": "admin"
 
-// DELETE
-await api.DELETE('/users/1');
-
-// HEAD
-await api.HEAD('/users/1');
-
-// OPTIONS
-await api.OPTIONS('/users');
-```
-
-### Resource API
-
-```typescript
-const Users = api.resource<User>('/users');
-
-// Automatically provides CRUD operations
-await Users.list();
-await Users.get('1');
-await Users.create(body);
-await Users.update('1', body);
-await Users.delete('1');
-```
-
-### Authentication
-
-```typescript
-// Configure authentication
-const tester = createTester({
-  baseURL: 'https://api.example.com',
-  auth: {
-    type: 'jwt',
-    loginUrl: '/auth/login',
-  },
-});
-
-// Login
-await api.login({
-  username: 'admin',
-  password: 'password',
-});
-
-// Set token directly
-api.setAuthToken('your-jwt-token');
-```
-
-### Validation
-
-```typescript
-const response = await api.POST('/users', body);
-
-await expect(response)
-  .status(201)
-  .header('content-type', 'application/json')
-  .responseTime(1000);
-```
-
-## UI Testing
-
-### Basic Actions
-
-```typescript
-// Navigation
-await ui.goto('/dashboard');
-
-// Interactions
-await ui.click('#submit');
-await ui.input('#email', 'test@example.com');
-await ui.hover('#menu');
-await ui.select('#country', 'US');
-await ui.check('#agree');
-await ui.uncheck('#subscribe');
-
-// File Upload
-await ui.upload('#file', '/path/to/file.pdf');
-
-// Screenshots
-await ui.screenshot('/path/to/screenshot.png');
-```
-
-### Assertions
-
-```typescript
-// Text assertions
-await uiExpect.text('#welcome', 'Welcome back');
-
-// Visibility
-await uiExpect.visible('#dashboard');
-await uiExpect.hidden('#loading');
-
-// Get element text
-const text = await ui.text('#title');
-```
-
-### Waiting
-
-```typescript
-// Wait for selector
-await uiWait.for('#results', 5000);
-
-// Wait for text
-await uiWait.forText('Success', 5000);
-
-// Wait for URL
-await uiWait.forUrl('/dashboard', 5000);
-```
-
-### Keyboard & Navigation
-
-```typescript
-// Keyboard
-await uiKeyboard.press('Enter');
-await uiKeyboard.type('#search', 'query', 100);
-
-// Navigation
-await uiNavigation.reload();
-await uiNavigation.back();
-await uiNavigation.forward();
-```
-
-## Page Objects
-
-```typescript
-import { PageObject } from '@otmc/tester';
-
-class LoginPage extends PageObject {
-  async login(username: string, password: string) {
-    await this.ui.input('#username', username);
-    await this.ui.input('#password', password);
-    await this.ui.click('#login');
-  }
-
-  async isLoggedIn() {
-    return await this.ui.isVisible('#dashboard');
-  }
-}
-
-// Usage
-const login = ui.page(LoginPage);
-await login.login('admin', 'password');
-```
-
-## Test API
-
-### Function-based Tests
-
-```typescript
-await test('Create User', async () => {
-  const user = await api.POST('/users', body);
-  await expect(user).toBeDefined();
-});
-```
-
-### Config-based Tests
-
-```typescript
-await apiTest({
-  name: 'Create User',
-  method: 'POST',
-  url: '/users',
-  body,
-  expect: {
-    status: 201,
-    responseTime: 1000,
-  },
-});
-```
-
-## Configuration
-
-```typescript
-const tester = createTester({
-  baseURL: 'https://api.example.com',
-  browser: 'chromium', // 'chromium' | 'firefox' | 'webkit'
-  timeout: 30000,
-  retries: 3,
-  headless: true,
-  viewport: { width: 1280, height: 720 },
-  userAgent: 'Custom User Agent',
-  locale: 'en-US',
-  timezoneId: 'America/New_York',
-  auth: {
-    type: 'jwt',
-    loginUrl: '/auth/login',
-  },
-});
-```
-
-## OpenAPI Client Generation
-
-```typescript
-import { generateOpenApiClient } from '@otmc/tester';
-
-await generateOpenApiClient({
-  input: './openapi.yaml',
-  output: './generated',
-  clientName: 'MyApiClient',
-});
-```
-
-## Lifecycle
-
-```typescript
-const tester = createTester(config);
-
-// Initialize browser and API context
-await tester.initialize();
-
-// Run tests
-await test('My Test', async () => {
-  // test code
-});
-
-// Cleanup and generate reports
-await tester.cleanup();
-```
-
-## Reports
-
-Test reports are automatically generated in the `test-results` directory:
-
-- `report.html` - Interactive HTML report
-- `report.json` - Machine-readable JSON report
-- `junit.xml` - JUnit-compatible XML report
-
-## Error Handling
-
-All errors are wrapped with meaningful context:
-
-```typescript
-try {
-  await api.POST('/users', body);
-} catch (error) {
-  if (error instanceof ApiError) {
-    console.error(error.status);
-    console.error(error.url);
-    console.error(error.headers);
-    console.error(error.request);
-    console.error(error.response);
-    console.error(error.duration);
-  }
+    }
 }
 ```
+
+The framework automatically returns:
+
+```typescript
+User
+```
+
+instead of:
+
+```typescript
+response.data
+```
+
+### Automatic Validation
+
+The framework automatically validates:
+
+- HTTP Status
+- JSON parsing
+- Success Response Contract
+- Error Response Contract
+- Content-Type
+- Required fields
+- Field types
+- Missing properties
+- Response mapping
+
+Developers should not manually write:
+
+```typescript
+expect(response.status()).toBe(201);
+```
+
+or:
+
+```typescript
+const json = await response.json();
+```
+
+### Generated Playwright Test
+
+The previous API definition is internally transformed into:
+
+```typescript
+test("Create User", async ({ request }) => {
+
+    const response = await request.post(...);
+
+    ...
+
+});
+```
+
+Developers never see this code.
+
+Playwright remains the execution engine.
+
+### Error Handling
+
+If an API returns:
+
+```json
+{
+
+    "success": false,
+
+    "message": "Request Failed",
+
+    "error": {
+
+        "code": 400,
+
+        "key": "BAD_REQUEST",
+
+        "detail": "sql: no rows in result set"
+
+    }
+
+}
+```
+
+The framework automatically throws:
+
+```text
+ApiError
+
+Status : 400
+
+Key : BAD_REQUEST
+
+Summary : Request Failed
+
+Detail : sql: no rows in result set
+```
+
+Developers do not need to inspect JSON manually.
+
+### Execution Flow
+
+```
+API Definition
+
+        │
+
+        ▼
+
+Build HTTP Request
+
+        │
+
+        ▼
+
+Playwright APIRequestContext
+
+        │
+
+        ▼
+
+Receive Response
+
+        │
+
+        ▼
+
+Validate Response Contract
+
+        │
+
+        ▼
+
+Deserialize Response
+
+        │
+
+        ▼
+
+Validate Model
+
+        │
+
+        ▼
+
+Return Typed Object
+
+        │
+
+        ▼
+
+Generate Logs & Report
+```
+
+## Complete Example
+
+```typescript
+import { defineAPIs } from "@otmc/tester";
+
+class User {
+
+    id!: string;
+
+    username!: string;
+
+    email!: string;
+
+}
+
+export default defineAPIs([
+
+    {
+
+        title: "List Users",
+
+        GET: "/users",
+
+        response: User[]
+
+    },
+
+    {
+
+        title: "Create User",
+
+        POST: "/users",
+
+        request: {
+
+            username: "admin",
+
+            email: "admin@test.com",
+
+            password: "123456"
+
+        },
+
+        response: User,
+
+        status: 201
+
+    },
+
+    {
+
+        title: "Get User",
+
+        GET: "/users/1",
+
+        response: User
+
+    },
+
+    {
+
+        title: "Delete User",
+
+        DELETE: "/users/1",
+
+        status: 204
+
+    }
+
+]);
+```
+
+Running:
+
+```bash
+npx playwright test
+```
+
+will automatically execute every API test case.
+
+No HTTP request code.
+
+No response parsing.
+
+No manual validation.
+
+No response unwrapping.
+
+Developers only describe the API contract.
+
+Playwright performs the execution.
+
+`@otmc/tester` performs the mapping, validation, diagnostics, and reporting.
 
 ## License
 

@@ -4,6 +4,10 @@
  * @Contributors Nguyen Van Trung, OTMC Contributors.
  **/
 export { createTester, Tester } from './core/tester.js';
+export { defineConfig } from './core/config.js';
+export { defineAPIs } from './core/api-definition.js';
+export { generateTests } from './core/test-generator.js';
+export { ResponseEnvelopeProcessor } from './validation/envelope-processor.js';
 export { api } from './api/api.js';
 export { ui, uiWait, uiKeyboard, uiNavigation, uiExpect } from './ui/ui.js';
 export { test, apiTest } from './test/test.js';
@@ -28,5 +32,7 @@ export type {
   DefaultSuccessEnvelope,
   DefaultErrorEnvelope,
   ResponseContractConfig,
-  ResponseContract
+  ResponseContract,
+  APITestCase,
+  ProjectConfig
 } from './core/types.js';

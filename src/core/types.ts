@@ -7,6 +7,7 @@ import type { Browser, BrowserContext, Page, APIRequestContext } from 'playwrigh
 
 export interface TesterConfig {
   baseURL: string;
+  response?: ResponseContractConfig;
   browser?: 'chromium' | 'firefox' | 'webkit';
   timeout?: number;
   retries?: number;
@@ -16,7 +17,6 @@ export interface TesterConfig {
   userAgent?: string;
   locale?: string;
   timezoneId?: string;
-  responseContract?: ResponseContract;
 }
 
 export interface AuthConfig {
@@ -191,3 +191,27 @@ export interface ResponseContractConfig {
 }
 
 export type ResponseContract = ResponseContractConfig | false;
+
+export interface APITestCase<TRequest = unknown, TResponse extends object = object> {
+  title: string;
+  GET?: string;
+  POST?: string;
+  PUT?: string;
+  PATCH?: string;
+  DELETE?: string;
+  HEAD?: string;
+  OPTIONS?: string;
+  request?: TRequest;
+  response?: new () => TResponse;
+  success?: new () => TResponse;
+  error?: new () => object;
+  status?: number;
+  headers?: Record<string, string>;
+  query?: Record<string, string>;
+  auth?: AuthConfig;
+}
+
+export interface ProjectConfig {
+  baseURL: string;
+  response?: ResponseContractConfig;
+}

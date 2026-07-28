@@ -23,43 +23,18 @@ export default defineAPIs([
     title: "Create User",
     POST: "/users",
     request: {
-      username: "john",
-      email: "john@example.com",
-      password: "secret123"
+      username: "admin",
+      email: "admin@test.com",
+      password: "123456"
     },
     response: User,
     status: 201
   },
 
   {
-    title: "Create User with Expectations",
-    POST: "/users",
-    request: {
-      username: "bob",
-      email: "bob@example.com",
-      password: "secret789"
-    },
-    response: User,
-    status: 201,
-    headers: {
-      "cache-control": "no-store"
-    }
-  },
-
-  {
     title: "Get User",
     GET: "/users/1",
     response: User
-  },
-
-  {
-    title: "Update User",
-    PUT: "/users/1",
-    request: {
-      email: "newemail@example.com"
-    },
-    response: User,
-    status: 200
   },
 
   {

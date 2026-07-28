@@ -83,7 +83,7 @@ export class ResponseEnvelopeProcessor {
     isCustomConfig: boolean
   ): EnvelopeResult<T> {
     const successField = config.successField ?? 'success';
-    const messageField = config.messageField;
+    const messageField = config.messageField ?? 'message';
     const dataField = config.dataField ?? 'data';
     const validationErrors: ValidationError[] = [];
 
@@ -96,7 +96,8 @@ export class ResponseEnvelopeProcessor {
       });
     }
 
-    if (isCustomConfig && messageField !== undefined && !(messageField in response)) {
+    // Validate message field exists
+    if (!(messageField in response)) {
       validationErrors.push({
         path: messageField,
         message: `Message field '${messageField}' is missing`,
@@ -125,7 +126,7 @@ export class ResponseEnvelopeProcessor {
     isCustomConfig: boolean
   ): EnvelopeResult<never> {
     const successField = config.successField ?? 'success';
-    const messageField = config.messageField;
+    const messageField = config.messageField ?? 'message';
     const errorField = config.errorField ?? 'error';
     const validationErrors: ValidationError[] = [];
 
@@ -138,7 +139,8 @@ export class ResponseEnvelopeProcessor {
       });
     }
 
-    if (isCustomConfig && messageField !== undefined && !(messageField in response)) {
+    // Validate message field exists
+    if (!(messageField in response)) {
       validationErrors.push({
         path: messageField,
         message: `Message field '${messageField}' is missing`,
