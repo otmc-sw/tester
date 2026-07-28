@@ -3,6 +3,5 @@
  * @Copyright (c) 2026 OTMC Softwares.
  * @Contributors Nguyen Van Trung, OTMC Contributors.
  **/
-export { defineConfig } from './define-config.js';
-export { defineAPIs } from './define-apis.js';
+export { defineConfig, defineAPIs } from './define.js';
 export { run } from './run.js';

@@ -5,6 +5,8 @@
  **/
 import type { APITestCase, APISuite, ProjectConfig } from './types/config.js';
 
+export { defineConfig } from './config/config.js';
+
 export function defineAPIs<TRequest = unknown, TResponse extends object = object>(
   testCases: APITestCase<TRequest, TResponse>[],
   config?: ProjectConfig
