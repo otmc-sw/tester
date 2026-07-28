@@ -16,10 +16,28 @@ export function createExecutor(suite: APISuite): { executor: Executor; reporter:
 
 export function run(
   suite: APISuite,
-  testFn: (title: string, fn: (context: { request: any }) => Promise<void>) => void
+  testFn: (title: string, fn: (context: { request: any }) => Promise<void>) => void,
+  describeFn?: (title: string, fn: () => void) => void,
+  suiteName?: string
 ): void {
   const { executor, reporter } = createExecutor(suite);
 
+  // Use describe to group tests if available
+  if (describeFn) {
+    describeFn(suiteName || 'API Tests', () => {
+      runTests(suite, executor, reporter, testFn);
+    });
+  } else {
+    runTests(suite, executor, reporter, testFn);
+  }
+}
+
+function runTests(
+  suite: APISuite,
+  executor: Executor,
+  reporter: Reporter,
+  testFn: (title: string, fn: (context: { request: any }) => Promise<void>) => void
+): void {
   // Reset database before running tests
   testFn('Setup: Reset database', async ({ request }: { request: any }) => {
     await request.post(`${suite.config.baseURL}/reset-db`);

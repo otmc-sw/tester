@@ -144,4 +144,6 @@ const suite = defineAPIs([
   }
 ], config);
 
-run(suite, test);
+test.describe('Users', () => {
+  run(suite, test);
+});

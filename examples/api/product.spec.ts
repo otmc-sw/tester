@@ -11,7 +11,7 @@ import config from '../config.js';
 const suite = defineAPIs([
   // GET - List all products
   {
-    title: "Products - List all products",
+    title: "List all products",
     GET: "/products",
     response: Product,
     status: 200
@@ -19,7 +19,7 @@ const suite = defineAPIs([
 
   // GET - List products with pagination
   {
-    title: "Products - List with pagination",
+    title: "List with pagination",
     GET: "/products?page=1&limit=20",
     response: Product,
     status: 200
@@ -27,7 +27,7 @@ const suite = defineAPIs([
 
   // GET - Filter products by category
   {
-    title: "Products - Filter by category",
+    title: "Filter by category",
     GET: "/products?category=electronics",
     response: Product,
     status: 200
@@ -35,7 +35,7 @@ const suite = defineAPIs([
 
   // GET - Filter products by price range
   {
-    title: "Products - Filter by price range",
+    title: "Filter by price range",
     GET: "/products?minPrice=100&maxPrice=1000",
     response: Product,
     status: 200
@@ -43,7 +43,7 @@ const suite = defineAPIs([
 
   // GET - Search products by name
   {
-    title: "Products - Search by name",
+    title: "Search by name",
     GET: "/products?search=laptop",
     response: Product,
     status: 200
@@ -51,7 +51,7 @@ const suite = defineAPIs([
 
   // GET - Get active products only
   {
-    title: "Products - Get active products only",
+    title: "Get active products only",
     GET: "/products?isActive=true",
     response: Product,
     status: 200
@@ -59,7 +59,7 @@ const suite = defineAPIs([
 
   // POST - Create new product
   {
-    title: "Products - Create new product",
+    title: "Create new product",
     POST: "/products",
     request: {
       name: "Laptop Pro 15",
@@ -74,7 +74,7 @@ const suite = defineAPIs([
 
   // POST - Create product with invalid data
   {
-    title: "Products - Create with negative price",
+    title: "Create with negative price",
     POST: "/products",
     request: {
       name: "Invalid Product",
@@ -87,7 +87,7 @@ const suite = defineAPIs([
   },
 
   {
-    title: "Products - Create with missing required fields",
+    title: "Create with missing required fields",
     POST: "/products",
     request: {
       name: "Incomplete Product"
@@ -96,7 +96,7 @@ const suite = defineAPIs([
   },
 
   {
-    title: "Products - Create with zero stock",
+    title: "Create with zero stock",
     POST: "/products",
     request: {
       name: "Out of Stock Product",
@@ -110,21 +110,21 @@ const suite = defineAPIs([
 
   // GET - Get product by ID
   {
-    title: "Products - Get by ID",
+    title: "Get by ID",
     GET: "/products/1",
     response: Product,
     status: 200
   },
 
   {
-    title: "Products - Get non-existent product",
+    title: "Get non-existent product",
     GET: "/products/99999",
     status: 404
   },
 
   // PUT - Update product completely
   {
-    title: "Products - Full update",
+    title: "Full update",
     PUT: "/products/1",
     request: {
       name: "Updated Laptop Pro 15",
@@ -140,7 +140,7 @@ const suite = defineAPIs([
 
   // PATCH - Update product partially
   {
-    title: "Products - Partial update - Price only",
+    title: "Partial update - Price only",
     PATCH: "/products/1",
     request: {
       price: 1099.99
@@ -150,7 +150,7 @@ const suite = defineAPIs([
   },
 
   {
-    title: "Products - Partial update - Stock only",
+    title: "Partial update - Stock only",
     PATCH: "/products/1",
     request: {
       stock: 40
@@ -160,7 +160,7 @@ const suite = defineAPIs([
   },
 
   {
-    title: "Products - Deactivate product",
+    title: "Deactivate product",
     PATCH: "/products/1",
     request: {
       isActive: false
@@ -171,20 +171,20 @@ const suite = defineAPIs([
 
   // DELETE - Delete product
   {
-    title: "Products - Delete product",
+    title: "Delete product",
     DELETE: "/products/3",
     status: 204
   },
 
   {
-    title: "Products - Delete non-existent product",
+    title: "Delete non-existent product",
     DELETE: "/products/99999",
     status: 404
   },
 
   // POST - Bulk update stock
   {
-    title: "Products - Bulk stock update",
+    title: "Bulk stock update",
     POST: "/products/bulk/stock",
     request: {
       updates: [
@@ -197,10 +197,12 @@ const suite = defineAPIs([
 
   // GET - Get product statistics
   {
-    title: "Products - Get statistics",
+    title: "Get statistics",
     GET: "/products/statistics",
     status: 200
   }
 ], config);
 
-run(suite, test);
+test.describe('Products', () => {
+  run(suite, test);
+});
