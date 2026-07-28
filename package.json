@@ -1,33 +1,75 @@
 {
-  "name": "@otmc/tester",
+  "name": "@otmc-sw/tester",
   "version": "0.1.1",
+  "description": "Modern Playwright wrapper for concise, type-safe API and UI testing.",
+  "license": "Apache-2.0",
+
   "type": "module",
+
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+
   "files": [
     "dist",
     "README.md",
     "LICENSE",
     "NOTICE"
   ],
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
+
+  "sideEffects": false,
+
+  "engines": {
+    "node": ">=20"
   },
+
+  "publishConfig": {
+    "access": "public"
+  },
+
   "scripts": {
-    "build": "tsc",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "npm run clean && tsc",
     "dev": "tsc --watch",
-    "prepublishOnly": "npm run build",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+    "prepublishOnly": "npm run build"
   },
-  "dependencies": {
+
+  "peerDependencies": {
     "@playwright/test": "^1.61.1"
   },
+
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@types/node": "^20.10.0",
     "typescript": "^5.3.0"
   },
-  "license": "Apache-2.0"
+
+  "keywords": [
+    "playwright",
+    "testing",
+    "api",
+    "rest",
+    "ui",
+    "e2e",
+    "typescript",
+    "automation",
+    "otmc"
+  ],
+
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/otmc-sw/tester.git"
+  },
+
+  "homepage": "https://github.com/otmc-sw/tester#readme",
+
+  "bugs": {
+    "url": "https://github.com/otmc-sw/tester/issues"
+  }
 }
