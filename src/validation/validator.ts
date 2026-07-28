@@ -65,7 +65,12 @@ export class ClassValidator<T extends object> implements Validator<T> {
       const actualValue = dataObj[key];
       const actualType = typeof actualValue;
 
-      if (actualType !== expectedType && actualValue !== null && actualValue !== undefined) {
+      if (
+        actualValue !== null &&
+        actualValue !== undefined &&
+        expectedType !== 'undefined' &&
+        actualType !== expectedType
+      ) {
         errors.push({
           path: prefix + String(key),
           message: `Field '${String(key)}' has incorrect type`,
