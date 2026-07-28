@@ -5,13 +5,13 @@
  **/
 
 // User related types
-export interface User {
-  id: string;
-  username: string;
-  email: string;
-  role: 'admin' | 'user' | 'moderator';
-  createdAt: string;
-  updatedAt: string;
+export class User {
+  id!: string;
+  username!: string;
+  email!: string;
+  role!: 'admin' | 'user' | 'moderator';
+  createdAt!: string;
+  updatedAt!: string;
 }
 
 export interface CreateUserRequest {
@@ -50,16 +50,16 @@ export interface RefreshTokenResponse {
 }
 
 // Product related types
-export interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  stock: number;
-  category: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+export class Product {
+  id!: string;
+  name!: string;
+  description!: string;
+  price!: number;
+  stock!: number;
+  category!: string;
+  isActive!: boolean;
+  createdAt!: string;
+  updatedAt!: string;
 }
 
 export interface CreateProductRequest {

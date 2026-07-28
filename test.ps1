@@ -14,8 +14,7 @@ if ($Server) {
     try {
     # Start testing
     Write-Host "Starting testing server ..." -ForegroundColor Green
-    cd examples
-    npx start server.js
+    node examples/server.js
     } catch {
         Write-Host "Failed to start testing server" -ForegroundColor Red
         exit 1

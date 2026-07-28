@@ -55,7 +55,9 @@ export class Executor {
       });
 
       this.responseValidator.validateStatus(response.status(), testCase.status);
-      this.responseValidator.validateContentType(response.headers()['content-type'] || '');
+      if (response.status() !== 204) {
+        this.responseValidator.validateContentType(response.headers()['content-type'] || '');
+      }
 
       const parsed = await this.responseParser.parse(response);
       

@@ -102,6 +102,7 @@ const suite = defineAPIs([
     request: {
       username: "updated_admin",
       email: "updated_admin@example.com",
+      password: "UpdatedPass123!",
       role: "admin"
     } as UpdateUserRequest,
     response: User,
@@ -132,7 +133,7 @@ const suite = defineAPIs([
   // DELETE - Delete user
   {
     title: "Delete User - Soft delete",
-    DELETE: "/users/2",
+    DELETE: "/users/1",
     status: 204
   },
 

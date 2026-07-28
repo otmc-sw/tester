@@ -7,10 +7,10 @@ import type { APITestCase, APISuite, ProjectConfig } from './types/config.js';
 
 export { defineConfig } from './config/config.js';
 
-export function defineAPIs<TRequest = unknown, TResponse extends object = object>(
-  testCases: APITestCase<TRequest, TResponse>[],
+export function defineAPIs(
+  testCases: APITestCase<any, any>[],
   config?: ProjectConfig
-): APISuite<TRequest, TResponse> {
+): APISuite<any, any> {
   return {
     config: config || { baseURL: '' },
     tests: testCases
