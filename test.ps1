@@ -15,7 +15,7 @@ if ($Server) {
     # Start testing
     Write-Host "Starting testing server ..." -ForegroundColor Green
     cd examples
-    npx json-server --watch db.json --port 3000
+    npx start server.js
     } catch {
         Write-Host "Failed to start testing server" -ForegroundColor Red
         exit 1
@@ -27,7 +27,7 @@ if ($Server) {
     npm run test:api
 }
 }
-catch {
+finally {
     Set-Location $PSScriptRoot
 }
 

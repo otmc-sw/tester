@@ -4,6 +4,7 @@
   "description": "Playwright tests for Document Hub APIs and UI",
   "main": "index.js",
   "scripts": {
+    "start": "node server.js",
     "test:api": "playwright test api/",
     "test:ui": "playwright test ui/",
     "test:all": "playwright test",
@@ -21,5 +22,8 @@
     "@playwright/test": "^1.61.1",
     "@types/node": "^26.1.1",
     "json-server": "^0.17.4"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
   }
 }
