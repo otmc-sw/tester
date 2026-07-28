@@ -172,7 +172,7 @@ const suite = defineAPIs([
   // DELETE - Delete product
   {
     title: "Products - Delete product",
-    DELETE: "/products/1",
+    DELETE: "/products/3",
     status: 204
   },
 

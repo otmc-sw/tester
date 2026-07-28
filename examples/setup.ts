@@ -4,9 +4,26 @@
  * @Contributors Nguyen Van Trung, OTMC Authors.
 **/
 import { request, FullConfig } from '@playwright/test';
+import fs from 'fs';
+import path from 'path';
 
 export default async function globalSetup(config: FullConfig) {
   const baseURL = config.projects[0].use.baseURL || 'http://localhost:3000';
+  
+  // Ensure data directory exists
+  const dataDir = path.join(process.cwd(), 'data');
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+  
+  // Reset database from template
+  const templatePath = path.join(process.cwd(), 'db.template.json');
+  const dbPath = path.join(dataDir, 'data.json');
+  
+  console.log('🔄 Resetting database from template...');
+  fs.copyFileSync(templatePath, dbPath);
+  console.log('✅ Database reset complete');
+  
   console.log(`🔍 Testing connection to ${baseURL}...`);
 
   try {

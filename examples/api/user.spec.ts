@@ -133,7 +133,7 @@ const suite = defineAPIs([
   // DELETE - Delete user
   {
     title: "Delete User - Soft delete",
-    DELETE: "/users/1",
+    DELETE: "/users/2",
     status: 204
   },
 

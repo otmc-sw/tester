@@ -20,6 +20,11 @@ export function run(
 ): void {
   const { executor, reporter } = createExecutor(suite);
 
+  // Reset database before running tests
+  testFn('Setup: Reset database', async ({ request }: { request: any }) => {
+    await request.post(`${suite.config.baseURL}/reset-db`);
+  });
+
   for (const testCase of suite.tests) {
     const normalized = normalize(testCase);
     

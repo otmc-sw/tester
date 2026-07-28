@@ -6,10 +6,10 @@
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  fullyParallel: true,
+  fullyParallel: false,
   forbidOnly: false,
   retries: 0,
-  workers: 4,
+  workers: 1,
   reporter: 'list',
   globalSetup: './setup.ts',
   use: {

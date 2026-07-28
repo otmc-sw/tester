@@ -14,7 +14,18 @@ const PORT = 3000;
 app.use(express.json());
 
 // Load initial data
-const dbPath = path.join(__dirname, 'db.json');
+const dbPath = path.join(__dirname, 'data', 'data.json');
+const templatePath = path.join(__dirname, 'db.template.json');
+
+// Ensure data directory exists and copy template if needed
+const dataDir = path.join(__dirname, 'data');
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+}
+if (!fs.existsSync(dbPath)) {
+  fs.copyFileSync(templatePath, dbPath);
+}
+
 let db = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
 
 // Helper function to save data
@@ -74,6 +85,28 @@ const validateUser = (user) => {
   return { valid: true };
 };
 
+// Helper function to send success response
+const sendSuccess = (res, data, message = 'Success', statusCode = 200) => {
+  res.status(statusCode).json({ success: true, message, data });
+};
+
+// Helper function to send error response
+const sendError = (res, message, statusCode = 400, error = null) => {
+  res.status(statusCode).json({ success: false, message, error });
+};
+
+// Reset database endpoint
+app.post('/reset-db', (req, res) => {
+  try {
+    const templateData = JSON.parse(fs.readFileSync(templatePath, 'utf8'));
+    db = templateData;
+    saveData();
+    sendSuccess(res, { message: 'Database reset successfully' }, 'Database reset');
+  } catch (error) {
+    sendError(res, 'Failed to reset database', 500, error);
+  }
+});
+
 // USERS endpoints
 app.get('/users', (req, res) => {
   let users = [...db.users];
@@ -89,21 +122,21 @@ app.get('/users', (req, res) => {
   const start = (page - 1) * limit;
   const end = start + limit;
   
-  res.json(users.slice(start, end));
+  sendSuccess(res, users.slice(start, end), 'Users retrieved successfully');
 });
 
 app.get('/users/:id', (req, res) => {
   const user = db.users.find(u => u.id === req.params.id);
   if (!user) {
-    return res.status(404).json({ message: 'User not found' });
+    return sendError(res, 'User not found', 404);
   }
-  res.json(user);
+  sendSuccess(res, user, 'User retrieved successfully');
 });
 
 app.post('/users', (req, res) => {
   const validation = validateUser(req.body);
   if (!validation.valid) {
-    return res.status(400).json({ message: validation.message });
+    return sendError(res, validation.message, 400);
   }
   
   const newUser = {
@@ -116,18 +149,18 @@ app.post('/users', (req, res) => {
   
   db.users.push(newUser);
   saveData();
-  res.status(201).json(newUser);
+  sendSuccess(res, newUser, 'User created successfully', 201);
 });
 
 app.put('/users/:id', (req, res) => {
   const index = db.users.findIndex(u => u.id === req.params.id);
   if (index === -1) {
-    return res.status(404).json({ message: 'User not found' });
+    return sendError(res, 'User not found', 404);
   }
   
   const validation = validateUser(req.body);
   if (!validation.valid) {
-    return res.status(400).json({ message: validation.message });
+    return sendError(res, validation.message, 400);
   }
   
   db.users[index] = {
@@ -138,18 +171,18 @@ app.put('/users/:id', (req, res) => {
   };
   
   saveData();
-  res.json(db.users[index]);
+  sendSuccess(res, db.users[index], 'User updated successfully');
 });
 
 app.patch('/users/:id', (req, res) => {
   const index = db.users.findIndex(u => u.id === req.params.id);
   if (index === -1) {
-    return res.status(404).json({ message: 'User not found' });
+    return sendError(res, 'User not found', 404);
   }
   
   // Partial validation - only validate fields being provided
   if (req.body.email && !isValidEmail(req.body.email)) {
-    return res.status(400).json({ message: 'Invalid email format' });
+    return sendError(res, 'Invalid email format', 400);
   }
   
   db.users[index] = {
@@ -160,13 +193,13 @@ app.patch('/users/:id', (req, res) => {
   };
   
   saveData();
-  res.json(db.users[index]);
+  sendSuccess(res, db.users[index], 'User updated successfully');
 });
 
 app.delete('/users/:id', (req, res) => {
   const index = db.users.findIndex(u => u.id === req.params.id);
   if (index === -1) {
-    return res.status(404).json({ message: 'User not found' });
+    return sendError(res, 'User not found', 404);
   }
   
   db.users.splice(index, 1);
@@ -210,7 +243,7 @@ app.get('/products', (req, res) => {
   const start = (page - 1) * limit;
   const end = start + limit;
   
-  res.json(products.slice(start, end));
+  sendSuccess(res, products.slice(start, end), 'Products retrieved successfully');
 });
 
 app.get('/products/statistics', (req, res) => {
@@ -221,27 +254,27 @@ app.get('/products/statistics', (req, res) => {
     ? db.products.reduce((sum, p) => sum + (p.price || 0), 0) / db.products.length 
     : 0;
   
-  res.json({
+  sendSuccess(res, {
     totalProducts,
     activeProducts,
     inactiveProducts: totalProducts - activeProducts,
     totalStock,
     averagePrice: avgPrice
-  });
+  }, 'Product statistics retrieved successfully');
 });
 
 app.get('/products/:id', (req, res) => {
   const product = db.products.find(p => p.id === req.params.id);
   if (!product) {
-    return res.status(404).json({ message: 'Product not found' });
+    return sendError(res, 'Product not found', 404);
   }
-  res.json(product);
+  sendSuccess(res, product, 'Product retrieved successfully');
 });
 
 app.post('/products', (req, res) => {
   const validation = validateProduct(req.body);
   if (!validation.valid) {
-    return res.status(400).json({ message: validation.message });
+    return sendError(res, validation.message, 400);
   }
   
   const newProduct = {
@@ -254,12 +287,12 @@ app.post('/products', (req, res) => {
   
   db.products.push(newProduct);
   saveData();
-  res.status(201).json(newProduct);
+  sendSuccess(res, newProduct, 'Product created successfully', 201);
 });
 
 app.post('/products/bulk/stock', (req, res) => {
   if (!req.body.updates || !Array.isArray(req.body.updates)) {
-    return res.status(400).json({ message: 'Updates array is required' });
+    return sendError(res, 'Updates array is required', 400);
   }
   
   const results = [];
@@ -284,18 +317,18 @@ app.post('/products/bulk/stock', (req, res) => {
   }
   
   saveData();
-  res.json({ results });
+  sendSuccess(res, { results }, 'Bulk stock update completed successfully');
 });
 
 app.put('/products/:id', (req, res) => {
   const index = db.products.findIndex(p => p.id === req.params.id);
   if (index === -1) {
-    return res.status(404).json({ message: 'Product not found' });
+    return sendError(res, 'Product not found', 404);
   }
   
   const validation = validateProduct(req.body);
   if (!validation.valid) {
-    return res.status(400).json({ message: validation.message });
+    return sendError(res, validation.message, 400);
   }
   
   db.products[index] = {
@@ -306,23 +339,23 @@ app.put('/products/:id', (req, res) => {
   };
   
   saveData();
-  res.json(db.products[index]);
+  sendSuccess(res, db.products[index], 'Product updated successfully');
 });
 
 app.patch('/products/:id', (req, res) => {
   const index = db.products.findIndex(p => p.id === req.params.id);
   if (index === -1) {
-    return res.status(404).json({ message: 'Product not found' });
+    return sendError(res, 'Product not found', 404);
   }
   
   // Validate price if provided
   if (req.body.price !== undefined && (typeof req.body.price !== 'number' || req.body.price < 0)) {
-    return res.status(400).json({ message: 'Price must be a non-negative number' });
+    return sendError(res, 'Price must be a non-negative number', 400);
   }
   
   // Validate stock if provided
   if (req.body.stock !== undefined && (typeof req.body.stock !== 'number' || req.body.stock < 0)) {
-    return res.status(400).json({ message: 'Stock must be a non-negative number' });
+    return sendError(res, 'Stock must be a non-negative number', 400);
   }
   
   db.products[index] = {
@@ -333,13 +366,13 @@ app.patch('/products/:id', (req, res) => {
   };
   
   saveData();
-  res.json(db.products[index]);
+  sendSuccess(res, db.products[index], 'Product updated successfully');
 });
 
 app.delete('/products/:id', (req, res) => {
   const index = db.products.findIndex(p => p.id === req.params.id);
   if (index === -1) {
-    return res.status(404).json({ message: 'Product not found' });
+    return sendError(res, 'Product not found', 404);
   }
   
   db.products.splice(index, 1);
