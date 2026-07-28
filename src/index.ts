@@ -4,4 +4,4 @@
  * @Contributors Nguyen Van Trung, OTMC Contributors.
  **/
 export { defineConfig, defineAPIs } from './define.js';
-export { run } from './run.js';
+export { run, createTestCases } from './run.js';

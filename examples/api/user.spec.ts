@@ -4,7 +4,7 @@
  * @Contributors Nguyen Van Trung, OTMC Contributors.
  **/
 import { test } from '@playwright/test';
-import { defineAPIs, run } from '../../src/index.js';
+import { defineAPIs, createTestCases } from '../../src/index.js';
 import { User, CreateUserRequest, UpdateUserRequest } from '../types.js';
 import config from '../config.js';
 
@@ -145,5 +145,11 @@ const suite = defineAPIs([
 ], config);
 
 test.describe('Users', () => {
-  run(suite, test);
+  const { setup, testCases } = createTestCases(suite);
+  setup(test);
+  for (const tc of testCases) {
+    test(tc.title, async ({ request }) => {
+      await tc.execute(request);
+    });
+  }
 });
