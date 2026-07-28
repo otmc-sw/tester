@@ -29,7 +29,7 @@ export class Tester {
   constructor(config: TesterConfig) {
     this.config = config;
     this.logger = new Logger();
-    this.reporter = new Reporter(this.logger);
+    this.reporter = new Reporter();
     this.api = new ApiClient(config, this.logger);
     this.ui = new UiClient(config, this.logger);
     this.testRunner = new TestRunner(this.reporter);

@@ -215,3 +215,8 @@ export interface ProjectConfig {
   baseURL: string;
   response?: ResponseContractConfig;
 }
+
+export interface APISuite<TRequest = unknown, TResponse extends object = object> {
+  config: ProjectConfig;
+  tests: APITestCase<TRequest, TResponse>[];
+}

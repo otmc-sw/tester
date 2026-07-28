@@ -3,10 +3,14 @@
  * @Copyright (c) 2026 OTMC Softwares.
  * @Contributors Nguyen Van Trung, OTMC Contributors.
  **/
-import type { APITestCase } from './types.js';
+import type { APITestCase, APISuite, ProjectConfig } from './types.js';
 
 export function defineAPIs<TRequest = unknown, TResponse extends object = object>(
-  testCases: APITestCase<TRequest, TResponse>[]
-): APITestCase<TRequest, TResponse>[] {
-  return testCases;
+  testCases: APITestCase<TRequest, TResponse>[],
+  config?: ProjectConfig
+): APISuite<TRequest, TResponse> {
+  return {
+    config: config || { baseURL: '' },
+    tests: testCases
+  };
 }
