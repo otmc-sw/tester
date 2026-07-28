@@ -3,8 +3,8 @@
  * @Copyright (c) 2026 OTMC Softwares.
  * @Contributors Nguyen Van Trung, OTMC Contributors.
  **/
-import type { APITestCase } from './types.js';
-import type { NormalizedTestCase } from './interfaces.js';
+import type { APITestCase } from '../types/config.js';
+import type { NormalizedTestCase } from '../types/api.js';
 
 export function normalize(testCase: APITestCase): NormalizedTestCase {
   const method = extractMethod(testCase);

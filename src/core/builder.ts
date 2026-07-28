@@ -3,7 +3,7 @@
  * @Copyright (c) 2026 OTMC Softwares.
  * @Contributors Nguyen Van Trung, OTMC Contributors.
  **/
-import type { IRequestBuilder, NormalizedTestCase } from './interfaces.js';
+import type { IRequestBuilder, NormalizedTestCase } from '../types/api.js';
 
 export class RequestBuilder implements IRequestBuilder {
   build(testCase: NormalizedTestCase): {

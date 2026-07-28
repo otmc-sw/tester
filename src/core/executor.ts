@@ -4,14 +4,14 @@
  * @Contributors Nguyen Van Trung, OTMC Contributors.
  **/
 import type { APIRequestContext } from 'playwright';
-import type { NormalizedTestCase } from './interfaces.js';
-import { RequestBuilder } from './request-builder.js';
-import { ResponseParser } from './response-parser.js';
-import { ResponseEnvelopeProcessor } from '../validation/envelope-processor.js';
-import { ResponseValidator } from './response-validator.js';
-import { ResponseMapper } from './response-mapper.js';
+import type { NormalizedTestCase } from '../types/api.js';
+import { RequestBuilder } from './builder.js';
+import { ResponseParser } from './parser.js';
+import { ResponseEnvelopeProcessor } from './envelope.js';
+import { ResponseValidator } from './validator.js';
+import { ResponseMapper } from './mapper.js';
 import { Reporter } from './reporter.js';
-import { StatusValidationError, ApiError } from './errors.js';
+import { StatusValidationError, ApiError } from '../errors/index.js';
 
 export class Executor {
   private requestBuilder: RequestBuilder;

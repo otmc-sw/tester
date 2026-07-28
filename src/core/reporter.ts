@@ -3,7 +3,7 @@
  * @Copyright (c) 2026 OTMC Softwares.
  * @Contributors Nguyen Van Trung, OTMC Contributors.
  **/
-import type { IReporter } from './interfaces.js';
+import type { IReporter } from '../types/api.js';
 
 export class Reporter implements IReporter {
   private logs: Array<{

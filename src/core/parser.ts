@@ -4,8 +4,8 @@
  * @Contributors Nguyen Van Trung, OTMC Contributors.
  **/
 import type { APIResponse } from 'playwright';
-import type { IResponseParser } from './interfaces.js';
-import { ContentTypeError } from './errors.js';
+import type { IResponseParser } from '../types/api.js';
+import { ContentTypeError } from '../errors/index.js';
 
 export class ResponseParser implements IResponseParser {
   async parse(response: APIResponse): Promise<unknown> {

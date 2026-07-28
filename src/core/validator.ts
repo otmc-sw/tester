@@ -3,8 +3,8 @@
  * @Copyright (c) 2026 OTMC Softwares.
  * @Contributors Nguyen Van Trung, OTMC Contributors.
  **/
-import type { IValidator, ValidationResult } from './interfaces.js';
-import { StatusValidationError, ResponseValidationError, ContentTypeError } from './errors.js';
+import type { IValidator, ValidationResult } from '../types/api.js';
+import { StatusValidationError, ResponseValidationError, ContentTypeError } from '../errors/index.js';
 
 export class ResponseValidator implements IValidator {
   validate(value: unknown, schema: unknown): ValidationResult {

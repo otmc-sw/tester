@@ -3,7 +3,7 @@
  * @Copyright (c) 2026 OTMC Softwares.
  * @Contributors Nguyen Van Trung, OTMC Contributors.
  **/
-import type { ResponseContractConfig } from './types.js';
+import type { ResponseContractConfig } from '../types/config.js';
 
 export class ResponseEnvelopeProcessor {
   private contract: ResponseContractConfig | false;

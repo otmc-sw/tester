@@ -3,7 +3,7 @@
  * @Copyright (c) 2026 OTMC Softwares.
  * @Contributors Nguyen Van Trung, OTMC Contributors.
  **/
-import type { APISuite } from './types.js';
+import type { APISuite } from '../types/config.js';
 import { Executor } from './executor.js';
 import { Reporter } from './reporter.js';
 import { normalize } from './normalizer.js';
