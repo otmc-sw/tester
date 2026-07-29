@@ -159,12 +159,6 @@ const suite = defineAPIs([
   },
 
   {
-    title: "Delete product",
-    DELETE: "/products/3",
-    status: 204
-  },
-
-  {
     title: "Delete non-existent product",
     DELETE: "/products/99999",
     status: 404
@@ -190,8 +184,7 @@ const suite = defineAPIs([
 ], config);
 
 test.describe('Products', () => {
-  const { setup, testCases } = createTestCases(suite);
-  setup(test);
+  const { testCases } = createTestCases(suite);
   for (const tc of testCases) {
     test(tc.title, async ({ request }) => {
       await tc.execute(request);

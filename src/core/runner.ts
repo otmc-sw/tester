@@ -56,12 +56,6 @@ async function executeTestCase(
 export function createTestCases(suite: APISuite) {
   const { executor, reporter } = createExecutor(suite);
 
-  const setup = (testFn: TestFunction): void => {
-    testFn('Setup: Reset database', async ({ request }) => {
-      await request.post(`${suite.config.baseURL}/reset-db`);
-    });
-  };
-
   const testCases = suite.tests.map((tc) => {
     const normalized = normalize(tc);
     return {
@@ -72,7 +66,6 @@ export function createTestCases(suite: APISuite) {
   });
 
   return {
-    setup,
     testCases,
     getReporter: () => reporter,
   };
@@ -111,14 +104,6 @@ function runTests(
   callerLocation?: Location
 ): void {
   const location = callerLocation || getCallerLocation();
-
-  testFn(
-    'Setup: Reset database',
-    async ({ request }) => {
-      await request.post(`${suite.config.baseURL}/reset-db`);
-    },
-    { location }
-  );
 
   for (const testCase of suite.tests) {
     const normalized = normalize(testCase);

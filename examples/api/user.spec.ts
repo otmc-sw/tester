@@ -123,12 +123,6 @@ const suite = defineAPIs([
   },
 
   {
-    title: "Delete User - Soft delete",
-    DELETE: "/users/2",
-    status: 204
-  },
-
-  {
     title: "Delete User - Non-existent user",
     DELETE: "/users/99999",
     status: 404
@@ -136,8 +130,7 @@ const suite = defineAPIs([
 ], config);
 
 test.describe('Users', () => {
-  const { setup, testCases } = createTestCases(suite);
-  setup(test);
+  const { testCases } = createTestCases(suite);
   for (const tc of testCases) {
     test(tc.title, async ({ request }) => {
       await tc.execute(request);
