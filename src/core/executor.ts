@@ -47,22 +47,33 @@ export class Executor {
       const response = await request.fetch(testCase.url, requestOptions);
       const duration = Date.now() - startTime;
 
+      // Parse response body first (so we can log it even if validation fails)
+      let responseBody: unknown = undefined;
+      if (response.status() !== 204) {
+        try {
+          responseBody = await this.responseParser.parse(response);
+        } catch {
+          // If parsing fails, still log the response without body
+        }
+      }
+
+      // Log response with body
       this.reporter.logResponse({
         status: response.status(),
         headers: response.headers() as Record<string, string>,
+        body: responseBody,
         duration,
         timestamp: Date.now(),
       });
 
+      // Validate status and content type
       this.responseValidator.validateStatus(response.status(), testCase.status);
       if (response.status() !== 204) {
         this.responseValidator.validateContentType(response.headers()['content-type'] || '');
       }
 
-      const parsed = await this.responseParser.parse(response);
-      
       if (testCase.response) {
-        const envelopeResult = this.envelopeProcessor.process<T>(parsed);
+        const envelopeResult = this.envelopeProcessor.process<T>(responseBody);
 
         if (envelopeResult.isError) {
           const error = envelopeResult.errorDetail as any;
@@ -96,7 +107,7 @@ export class Executor {
         return this.responseMapper.map<T>(envelopeResult.data, testCase.response as new () => T);
       }
 
-      return parsed as T;
+      return responseBody as T;
     } catch (error) {
       const duration = Date.now() - startTime;
       this.reporter.logError(error as Error, { duration });

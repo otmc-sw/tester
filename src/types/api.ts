@@ -75,4 +75,8 @@ export interface IReporter {
   }): void;
 
   onSuiteComplete?(): void;
+
+  setCurrentTest?(title: string): void;
+
+  clearCurrentTest?(): void;
 }

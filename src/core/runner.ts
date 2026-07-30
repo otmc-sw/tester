@@ -35,6 +35,7 @@ async function executeTestCase(
   request: APIRequestContext
 ): Promise<void> {
   const startTime = performance.now();
+  reporter.setCurrentTest(normalizedTc.title);
   try {
     await executor.execute(request, normalizedTc);
     reporter.onTestComplete({
@@ -50,6 +51,8 @@ async function executeTestCase(
       error: error as Error,
     });
     throw error;
+  } finally {
+    reporter.clearCurrentTest();
   }
 }
 
