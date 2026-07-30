@@ -3,22 +3,61 @@
  * @Copyright (c) 2026 OTMC Softwares.
  * @Contributors Nguyen Van Trung, OTMC Contributors.
  **/
-import type { ResponseContractConfig } from '../types/config.js';
+import type { ResponseContractConfig, ResponseField, NormalizedResponseField } from '../types/config.js';
+
+function normalizeField(field: ResponseField | undefined, defaultName: string): NormalizedResponseField {
+  if (field === undefined || field === null) {
+    return { name: defaultName, required: true };
+  }
+
+  if (typeof field === 'string') {
+    return { name: field, required: true };
+  }
+
+  return {
+    name: field.name,
+    required: field.required !== false,
+  };
+}
+
+interface NormalizedSuccessConfig {
+  successField: NormalizedResponseField;
+  messageField: NormalizedResponseField;
+  dataField: NormalizedResponseField;
+}
+
+interface NormalizedErrorConfig {
+  successField: NormalizedResponseField;
+  messageField: NormalizedResponseField;
+  errorField: NormalizedResponseField;
+}
+
+interface NormalizedContract {
+  success: NormalizedSuccessConfig;
+  error: NormalizedErrorConfig;
+}
 
 export class ResponseEnvelopeProcessor {
-  private contract: ResponseContractConfig | false;
+  private contract: NormalizedContract | false;
 
   constructor(contract?: ResponseContractConfig | false) {
-    this.contract = contract !== undefined ? contract : {
+    if (contract === false) {
+      this.contract = false;
+      return;
+    }
+
+    const rawConfig = contract || {};
+
+    this.contract = {
       success: {
-        successField: 'success',
-        messageField: 'message',
-        dataField: 'data',
+        successField: normalizeField(rawConfig.success?.successField, 'success'),
+        messageField: normalizeField(rawConfig.success?.messageField, 'message'),
+        dataField: normalizeField(rawConfig.success?.dataField, 'data'),
       },
       error: {
-        successField: 'success',
-        messageField: 'message',
-        errorField: 'error',
+        successField: normalizeField(rawConfig.error?.successField, 'success'),
+        messageField: normalizeField(rawConfig.error?.messageField, 'message'),
+        errorField: normalizeField(rawConfig.error?.errorField, 'error'),
       },
     };
   }
@@ -31,99 +70,93 @@ export class ResponseEnvelopeProcessor {
     const responseObj = response as Record<string, unknown>;
     const successConfig = this.contract.success;
     const errorConfig = this.contract.error;
-    const hasCustomSuccessConfig = successConfig !== undefined;
-    const hasCustomErrorConfig = errorConfig !== undefined;
 
-    const successField = hasCustomSuccessConfig && successConfig.successField ? successConfig.successField : 'success';
-    const successValue = responseObj[successField];
+    const successField = successConfig.successField;
+    const successValue = responseObj[successField.name];
 
     if (typeof successValue !== 'boolean') {
       return {
         data: response as T,
         isError: false,
         validationErrors: [{
-          path: successField,
+          path: successField.name,
           message: `Expected boolean, got ${typeof successValue}`,
         }],
       };
     }
 
     if (successValue === false) {
-      return this.processErrorEnvelope(responseObj, errorConfig, hasCustomErrorConfig);
+      return this.processErrorEnvelope(responseObj, errorConfig);
     }
 
     if (successValue === true) {
-      return this.processSuccessEnvelope<T>(responseObj, successConfig, hasCustomSuccessConfig);
+      return this.processSuccessEnvelope<T>(responseObj, successConfig);
     }
 
     return { data: response as T, isError: false };
   }
 
+  private checkRequiredField(
+    response: Record<string, unknown>,
+    field: NormalizedResponseField,
+    errors: Array<{ path: string; message: string }>
+  ): boolean {
+    const exists = field.name in response;
+    
+    if (!exists) {
+      if (field.required) {
+        errors.push({
+          path: field.name,
+          message: `Required field missing: ${field.name}`,
+        });
+        return false;
+      }
+      return false;
+    }
+
+    return true;
+  }
+
   private processSuccessEnvelope<T>(
     response: Record<string, unknown>,
-    config?: { successField?: string; messageField?: string; dataField?: string },
-    hasCustomConfig = false
+    config: NormalizedSuccessConfig
   ): EnvelopeResult<T> {
     const validationErrors: Array<{ path: string; message: string }> = [];
-    const successField = config?.successField || 'success';
-    const messageField = config?.messageField || 'message';
-    const dataField = config?.dataField || 'data';
 
-    if (!(messageField in response)) {
-      validationErrors.push({
-        path: messageField,
-        message: `Required field missing: ${messageField}`,
-      });
-    }
+    this.checkRequiredField(response, config.messageField, validationErrors);
 
-    if (!(dataField in response)) {
-      validationErrors.push({
-        path: dataField,
-        message: `Required field missing: ${dataField}`,
-      });
-    }
+    const dataExists = this.checkRequiredField(response, config.dataField, validationErrors);
+    const dataFieldName = config.dataField.name;
 
     if (validationErrors.length > 0) {
       return {
-        data: (response[dataField] || response) as T,
+        data: (dataExists ? response[dataFieldName] : response) as T,
         isError: false,
         validationErrors,
       };
     }
 
     return {
-      data: response[dataField] as T,
+      data: response[dataFieldName] as T,
       isError: false,
     };
   }
 
   private processErrorEnvelope(
     response: Record<string, unknown>,
-    config?: { successField?: string; messageField?: string; errorField?: string },
-    hasCustomConfig = false
+    config: NormalizedErrorConfig
   ): EnvelopeResult<never> {
     const validationErrors: Array<{ path: string; message: string }> = [];
-    const messageField = config?.messageField || 'message';
-    const errorField = config?.errorField || 'error';
 
-    if (!(messageField in response)) {
-      validationErrors.push({
-        path: messageField,
-        message: `Required field missing: ${messageField}`,
-      });
-    }
+    this.checkRequiredField(response, config.messageField, validationErrors);
 
-    if (!(errorField in response)) {
-      validationErrors.push({
-        path: errorField,
-        message: `Required field missing: ${errorField}`,
-      });
-    }
+    const errorExists = this.checkRequiredField(response, config.errorField, validationErrors);
+    const errorFieldName = config.errorField.name;
 
     return {
       data: undefined as never,
       isError: true,
-      errorDetail: response[errorField],
+      errorDetail: errorExists ? response[errorFieldName] : undefined,
       validationErrors,
     };
   }

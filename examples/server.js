@@ -192,6 +192,15 @@ app.delete('/users/:id', (req, res) => {
   res.status(204).send();
 });
 
+app.get('/users/minimal', (req, res) => {
+  const users = [...db.users];
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || users.length;
+  const start = (page - 1) * limit;
+  const end = start + limit;
+  res.status(200).json({ success: true, data: users.slice(start, end) });
+});
+
 app.get('/products', (req, res) => {
   let products = [...db.products];
   

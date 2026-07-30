@@ -105,7 +105,6 @@ export class Reporter implements IReporter {
   }
 
   onSuiteComplete(): void {
-    // Log files are already written per test case in onTestComplete
   }
 
   getLogs(): LogEntry[] {
@@ -155,13 +154,11 @@ export class Reporter implements IReporter {
 
     let md = `# ${result.title}\n\n`;
 
-    // URL
     if (requestLog) {
       const reqData = requestLog.data as { method: string; url: string };
       md += `## URL\n\`${reqData.method} ${reqData.url}\`\n\n`;
     }
 
-    // Request
     md += `## Request\n\n`;
     if (requestLog) {
       const reqData = requestLog.data as {
@@ -183,7 +180,6 @@ export class Reporter implements IReporter {
       md += `_No request data recorded._\n\n`;
     }
 
-    // Response
     md += `## Response\n\n`;
     if (responseLog) {
       const resData = responseLog.data as {
@@ -206,7 +202,6 @@ export class Reporter implements IReporter {
       md += `_No response data recorded._\n\n`;
     }
 
-    // Validation Result
     md += `## Validation Result\n\n`;
     if (result.status === 'passed') {
       md += `**Status:** ✅ Passed\n`;
@@ -214,19 +209,16 @@ export class Reporter implements IReporter {
       md += `**Status:** ❌ Failed\n`;
       if (result.error) {
         md += `\n**Error:** ${result.error.message}\n\n`;
-        // Extract diagnostics from error
         const err = result.error as any;
         if (err.diagnostics) {
           md += `**Diagnostics:**\n\`\`\`json\n${JSON.stringify(err.diagnostics, null, 2)}\n\`\`\`\n\n`;
         }
-        // Extract additional error details
         if (err.detail) {
           md += `**Detail:** ${err.detail}\n\n`;
         }
         if (err.summary) {
           md += `**Summary:** ${err.summary}\n\n`;
         }
-        // If there's additional error info
         if (err.expected !== undefined || err.actual !== undefined) {
           md += `| Field | Expected | Actual |\n`;
           md += `|-------|----------|--------|\n`;

@@ -4,16 +4,28 @@
  * @Contributors Nguyen Van Trung, OTMC Contributors.
  **/
 
+export interface ResponseFieldConfig {
+  name: string;
+  required?: boolean;
+}
+
+export type ResponseField = string | ResponseFieldConfig;
+
+export interface NormalizedResponseField {
+  name: string;
+  required: boolean;
+}
+
 export interface ResponseContractConfig {
   success?: {
-    successField?: string;
-    messageField?: string;
-    dataField?: string;
+    successField?: ResponseField;
+    messageField?: ResponseField;
+    dataField?: ResponseField;
   };
   error?: {
-    successField?: string;
-    messageField?: string;
-    errorField?: string;
+    successField?: ResponseField;
+    messageField?: ResponseField;
+    errorField?: ResponseField;
   };
 }
 
