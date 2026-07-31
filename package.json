@@ -1,6 +1,6 @@
 {
   "name": "@otmc-sw/tester",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Modern Playwright wrapper for concise, type-safe API and UI testing.",
   "license": "Apache-2.0",
 
