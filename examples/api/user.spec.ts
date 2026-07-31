@@ -31,6 +31,13 @@ const suite = defineAPIs([
   },
 
   {
+    title: "This should be failed",
+    GET: "/users/999999",
+    response: User,
+    status: 200
+  },
+
+  {
     title: "Create User - Create admin user",
     POST: "/users",
     request: {

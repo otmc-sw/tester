@@ -93,7 +93,7 @@ export class Reporter implements IReporter {
     status: 'passed' | 'failed';
     duration: number;
     error?: Error;
-  }): void {
+  }): string {
     const entry: TestResultEntry = {
       title: result.title,
       status: result.status,
@@ -101,7 +101,7 @@ export class Reporter implements IReporter {
       error: result.error,
     };
     this.testResults.push(entry);
-    this.writeLogFile(entry);
+    return this.writeLogFile(entry);
   }
 
   onSuiteComplete(): void {
@@ -137,7 +137,7 @@ export class Reporter implements IReporter {
     }
   }
 
-  private writeLogFile(result: TestResultEntry): void {
+  private writeLogFile(result: TestResultEntry): string {
     const logsDir = path.resolve(this.logsDir);
     fs.mkdirSync(logsDir, { recursive: true });
     const testLogs = this.logs.filter(l => l.testTitle === result.title);
@@ -145,6 +145,7 @@ export class Reporter implements IReporter {
     const fileName = this.sanitizeFileName(result.title) + '.md';
     const filePath = path.join(logsDir, fileName);
     fs.writeFileSync(filePath, markdown, 'utf-8');
+    return filePath;
   }
 
   private buildMarkdown(result: TestResultEntry, logs: LogEntry[]): string {

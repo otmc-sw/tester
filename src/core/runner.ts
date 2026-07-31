@@ -8,6 +8,7 @@ import type { APISuite } from '../types/config.js';
 import { Executor } from './executor.js';
 import { Reporter } from './reporter.js';
 import { normalize } from './normalizer.js';
+import { pathToFileURL } from "node:url";
 
 export interface Location {
   file: string;
@@ -44,12 +45,13 @@ async function executeTestCase(
       duration: Math.round(performance.now() - startTime),
     });
   } catch (error) {
-    reporter.onTestComplete({
+    const logPath = reporter.onTestComplete({
       title: normalizedTc.title,
       status: 'failed',
       duration: Math.round(performance.now() - startTime),
       error: error as Error,
     });
+    (error as Error).message += `\n📄 Log file: ${pathToFileURL(logPath).href}`;
     throw error;
   } finally {
     reporter.clearCurrentTest();
