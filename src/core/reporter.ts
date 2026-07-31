@@ -28,7 +28,7 @@ export class Reporter implements IReporter {
   private logsDir: string;
 
   constructor(logsDir?: string) {
-    this.logsDir = logsDir || 'test-results/logs';
+    this.logsDir = logsDir || 'data/logs';
   }
 
   setCurrentTest(title: string): void {
@@ -152,14 +152,14 @@ export class Reporter implements IReporter {
     const responseLog = logs.find(l => l.type === 'response');
     const errorLog = logs.find(l => l.type === 'error');
 
-    let md = `# ${result.title}\n\n`;
+    let md = `# 📋 ${result.title}\n\n`;
 
     if (requestLog) {
       const reqData = requestLog.data as { method: string; url: string };
-      md += `## URL\n\`${reqData.method} ${reqData.url}\`\n\n`;
+      md += `## 🔗 URL\n\`${reqData.method} ${reqData.url}\`\n\n`;
     }
 
-    md += `## Request\n\n`;
+    md += `## 📤 Request\n\n`;
     if (requestLog) {
       const reqData = requestLog.data as {
         method: string;
@@ -167,20 +167,20 @@ export class Reporter implements IReporter {
         headers: Record<string, string>;
         body?: unknown;
       };
-      md += `**Method:** \`${reqData.method}\`\n\n`;
+      md += `**🔧 Method:** \`${reqData.method}\`\n\n`;
       if (reqData.headers && Object.keys(reqData.headers).length > 0) {
-        md += `**Headers:**\n\`\`\`json\n${JSON.stringify(reqData.headers, null, 2)}\n\`\`\`\n\n`;
+        md += `**📑 Headers:**\n\`\`\`json\n${JSON.stringify(reqData.headers, null, 2)}\n\`\`\`\n\n`;
       }
       if (reqData.body !== undefined) {
-        md += `**Body:**\n\`\`\`json\n${JSON.stringify(reqData.body, null, 2)}\n\`\`\`\n\n`;
+        md += `**📦 Body:**\n\`\`\`json\n${JSON.stringify(reqData.body, null, 2)}\n\`\`\`\n\n`;
       } else {
-        md += `**Body:** _(none)_\n\n`;
+        md += `**📦 Body:** _(none)_\n\n`;
       }
     } else {
-      md += `_No request data recorded._\n\n`;
+      md += `_⚠️ No request data recorded._\n\n`;
     }
 
-    md += `## Response\n\n`;
+    md += `## 📥 Response\n\n`;
     if (responseLog) {
       const resData = responseLog.data as {
         status: number;
@@ -188,53 +188,53 @@ export class Reporter implements IReporter {
         body?: unknown;
         duration: number;
       };
-      md += `**Status:** \`${resData.status}\`\n\n`;
+      md += `**🔢 Status:** \`${resData.status}\`\n\n`;
       if (resData.headers && Object.keys(resData.headers).length > 0) {
-        md += `**Headers:**\n\`\`\`json\n${JSON.stringify(resData.headers, null, 2)}\n\`\`\`\n\n`;
+        md += `**📑 Headers:**\n\`\`\`json\n${JSON.stringify(resData.headers, null, 2)}\n\`\`\`\n\n`;
       }
       if (resData.body !== undefined) {
-        md += `**Body:**\n\`\`\`json\n${JSON.stringify(resData.body, null, 2)}\n\`\`\`\n\n`;
+        md += `**📦 Body:**\n\`\`\`json\n${JSON.stringify(resData.body, null, 2)}\n\`\`\`\n\n`;
       } else {
-        md += `**Body:** _(none)_\n\n`;
+        md += `**📦 Body:** _(none)_\n\n`;
       }
-      md += `**Duration:** ${resData.duration}ms\n\n`;
+      md += `**⏱️ Duration:** ${resData.duration}ms\n\n`;
     } else {
-      md += `_No response data recorded._\n\n`;
+      md += `_⚠️ No response data recorded._\n\n`;
     }
 
-    md += `## Validation Result\n\n`;
+    md += `## ✅ Validation Result\n\n`;
     if (result.status === 'passed') {
       md += `**Status:** ✅ Passed\n`;
     } else {
       md += `**Status:** ❌ Failed\n`;
       if (result.error) {
-        md += `\n**Error:** ${result.error.message}\n\n`;
+        md += `\n**🚨 Error:** ${result.error.message}\n\n`;
         const err = result.error as any;
         if (err.diagnostics) {
-          md += `**Diagnostics:**\n\`\`\`json\n${JSON.stringify(err.diagnostics, null, 2)}\n\`\`\`\n\n`;
+          md += `**🔍 Diagnostics:**\n\`\`\`json\n${JSON.stringify(err.diagnostics, null, 2)}\n\`\`\`\n\n`;
         }
         if (err.detail) {
-          md += `**Detail:** ${err.detail}\n\n`;
+          md += `**📝 Detail:** ${err.detail}\n\n`;
         }
         if (err.summary) {
-          md += `**Summary:** ${err.summary}\n\n`;
+          md += `**📊 Summary:** ${err.summary}\n\n`;
         }
         if (err.expected !== undefined || err.actual !== undefined) {
-          md += `| Field | Expected | Actual |\n`;
+          md += `| 🏷️ Field | ✅ Expected | ❌ Actual |\n`;
           md += `|-------|----------|--------|\n`;
           md += `| - | \`${JSON.stringify(err.expected)}\` | \`${JSON.stringify(err.actual)}\` |\n\n`;
         }
         if (err.stack) {
-          md += `**Stack Trace:**\n\`\`\`\n${err.stack}\n\`\`\`\n`;
+          md += `**🧩 Stack Trace:**\n\`\`\`\n${err.stack}\n\`\`\`\n`;
         }
       }
       if (errorLog) {
         const errData = errorLog.data as { error: { message: string; name: string }; diagnostics?: Record<string, unknown> };
         if (!result.error) {
-          md += `**Error:** ${errData.error.message}\n\n`;
+          md += `**🚨 Error:** ${errData.error.message}\n\n`;
         }
         if (errData.diagnostics) {
-          md += `**Diagnostics:**\n\`\`\`json\n${JSON.stringify(errData.diagnostics, null, 2)}\n\`\`\`\n\n`;
+          md += `**🔍 Diagnostics:**\n\`\`\`json\n${JSON.stringify(errData.diagnostics, null, 2)}\n\`\`\`\n\n`;
         }
       }
     }
