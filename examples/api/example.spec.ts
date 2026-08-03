@@ -4,7 +4,7 @@
  * @Contributors Nguyen Van Trung, OTMC Contributors.
  **/
 import { test } from '@playwright/test';
-import { defineAPIs, createTestCases } from '../../src/index.js';
+import { defineAPIs, createTestCases } from '@otmc-sw/tester';
 import { User, CreateUserRequest, UpdateUserRequest } from '../types.js';
 import config from '../config.js';
 
