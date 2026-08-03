@@ -364,6 +364,34 @@ response (if available)
 status
 ```
 
+`status` accepts either a single number or an array of numbers:
+
+```ts
+// Single status code
+{
+    title: "List all products",
+    GET: "/products",
+    response: Product,
+    status: 200
+}
+
+// Single status code (array form)
+{
+    title: "List all products",
+    GET: "/products",
+    response: Product,
+    status: [200]
+}
+
+// Multiple accepted status codes
+{
+    title: "List all products",
+    GET: "/products",
+    response: Product,
+    status: [200, 201]
+}
+```
+
 Example:
 
 ```ts
@@ -387,7 +415,6 @@ Always generate
 ```ts
 test.describe('Users', () => {
     const { testCases } = createTestCases(suite);
-
     for (const tc of testCases) {
         test(tc.title, async ({ request }) => {
             await tc.execute(request);
@@ -398,17 +425,6 @@ test.describe('Users', () => {
 
 ---
 
-## Step 7. File Header
-
-Always include
-
-```ts
-/**
- * @License Apache License 2.0
- * @Copyright (c) 2026 OTMC Softwares.
- * @Contributors Nguyen Van Trung, OTMC Contributors.
- **/
-```
 
 ---
 

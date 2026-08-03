@@ -274,6 +274,33 @@ Hỗ trợ đầy đủ các HTTP methods:
 }
 ```
 
+**Multiple Status Codes**
+```typescript
+// Chấp nhận một status code
+{
+  title: "List all products",
+  GET: "/products",
+  response: Product,
+  status: 200
+}
+
+// Chấp nhận một status code (dạng mảng)
+{
+  title: "List all products",
+  GET: "/products",
+  response: Product,
+  status: [200]
+}
+
+// Chấp nhận nhiều status code
+{
+  title: "List all products",
+  GET: "/products",
+  response: Product,
+  status: [200, 201]
+}
+```
+
 **Response với Envelope**
 ```typescript
 {
