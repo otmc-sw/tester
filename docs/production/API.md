@@ -68,6 +68,130 @@ Do **NOT** generate:
 
 ---
 
+config.ts
+
+```ts
+import { defineConfig } from '../src/index.js';
+
+export default defineConfig({
+  baseURL: 'http://localhost:3000',
+  response: {
+    success: {
+      successField: 'success',
+      messageField: { name: 'message', required: false },
+      dataField: 'data'
+    },
+    error: {
+      successField: 'success',
+      messageField: { name: 'message', required: false },
+      errorField: 'error'
+    }
+  }
+});
+
+```
+
+types.ts
+
+```ts
+export interface SuccessResponse<T> {
+  success: true;
+  message: string;
+  data: T;
+}
+
+export interface ErrorResponse {
+  success: false;
+  message: string;
+  error: {
+    code: number;
+    key: string;
+    type: string;
+    summary: string;
+    detail: string;
+    file: string;
+    line: number;
+    function: string;
+    timestamp: string;
+  };
+}
+
+export class User {
+  id!: string;
+  username!: string;
+  email!: string;
+  role!: 'admin' | 'user' | 'moderator';
+  createdAt!: string;
+  updatedAt!: string;
+}
+
+export interface CreateUserRequest {
+  username: string;
+  email: string;
+  password: string;
+  role?: 'admin' | 'user' | 'moderator';
+}
+
+export interface UpdateUserRequest {
+  username?: string;
+  email?: string;
+  role?: 'admin' | 'user' | 'moderator';
+}
+```
+
+api/example.spec.ts
+
+```ts
+import { test } from '@playwright/test';
+import { defineAPIs, createTestCases } from '@otmc-sw/tester';
+import { User, CreateUserRequest, UpdateUserRequest } from '../types.js';
+import config from '../config.js';
+
+const suite = defineAPIs([
+  {
+    title: "List all users",
+    GET: "/users",
+    response: User,
+    status: 200
+  },
+  {
+    title: "Get user by ID",
+    GET: "/users/1",
+    response: User,
+    status: 200
+  },
+  {
+    title: "Create a new user",
+    POST: "/users",
+    request: CreateUserRequest,
+    response: User,
+    status: 201
+  },
+  {
+    title: "Update user",
+    PUT: "/users/1",
+    request: UpdateUserRequest,
+    response: User,
+    status: 200
+  },
+  {
+    title: "Delete user",
+    DELETE: "/users/1",
+    status: 204
+  }
+], config);
+
+const testCases = createTestCases(suite);
+
+test.describe("Users", () => {
+  for (const tc of testCases) {
+    test(tc.title, async ({ request }) => {
+      await tc.execute(request);
+    });
+  }
+});
+```
+
 ## Step 3. Generate Typical Success Cases
 
 ### GET collection
