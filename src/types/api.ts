@@ -11,7 +11,7 @@ export interface NormalizedTestCase {
   url: string;
   request?: unknown;
   response?: new () => object;
-  status?: number;
+  status?: number | number[];
   headers?: Record<string, string>;
   query?: Record<string, string>;
   auth?: unknown;

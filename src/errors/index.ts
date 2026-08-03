@@ -89,7 +89,7 @@ export class StatusValidationError extends TesterError {
       headers?: Record<string, string>;
       duration?: number;
       diagnostics?: Record<string, unknown>;
-      expected?: number;
+      expected?: number | number[];
       actual?: number;
     } = {}
   ) {

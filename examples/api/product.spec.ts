@@ -17,6 +17,20 @@ const suite = defineAPIs([
   },
 
   {
+    title: "List all products (single status array)",
+    GET: "/products",
+    response: Product,
+    status: [200]
+  },
+
+  {
+    title: "List all products (multiple statuses)",
+    GET: "/products",
+    response: Product,
+    status: [200, 201]
+  },
+
+  {
     title: "List with pagination",
     GET: "/products?page=1&limit=20",
     response: Product,

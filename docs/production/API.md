@@ -68,6 +68,15 @@ Do **NOT** generate:
 
 ---
 
+### Install latest version
+
+```bash
+cd tests/playwright
+npm install @otmc-sw/tester@latest
+```
+
+---
+
 config.ts
 
 ```ts
@@ -149,41 +158,51 @@ import config from '../config.js';
 
 const suite = defineAPIs([
   {
-    title: "List all users",
+    title: "List Users - Get all users",
     GET: "/users",
     response: User,
     status: 200
   },
+
   {
-    title: "Get user by ID",
+    title: "Create User - Create admin user",
+    POST: "/users",
+    request: {
+      username: "admin_user",
+      email: "admin@example.com",
+      password: "SecurePass123!",
+      role: "admin"
+    } as CreateUserRequest,
+    response: User,
+    status: 201
+  },
+
+  {
+    title: "Get User - By ID",
     GET: "/users/1",
     response: User,
     status: 200
   },
+
   {
-    title: "Create a new user",
-    POST: "/users",
-    request: CreateUserRequest,
-    response: User,
-    status: 201
-  },
-  {
-    title: "Update user",
-    PUT: "/users/1",
-    request: UpdateUserRequest,
+    title: "Update User - Partial update - Email only",
+    PATCH: "/users/1",
+    request: {
+      email: "new_email@example.com"
+    } as UpdateUserRequest,
     response: User,
     status: 200
   },
+
   {
-    title: "Delete user",
-    DELETE: "/users/1",
-    status: 204
+    title: "Delete User - Non-existent user",
+    DELETE: "/users/99999",
+    status: 404
   }
 ], config);
 
-const testCases = createTestCases(suite);
-
-test.describe("Users", () => {
+test.describe('Users', () => {
+  const { testCases } = createTestCases(suite);
   for (const tc of testCases) {
     test(tc.title, async ({ request }) => {
       await tc.execute(request);

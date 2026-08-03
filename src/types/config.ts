@@ -52,7 +52,7 @@ export interface APITestCase<TRequest = unknown, TResponse extends object = obje
   OPTIONS?: string;
   request?: TRequest;
   response?: new () => TResponse;
-  status?: number;
+  status?: number | number[];
   headers?: Record<string, string>;
   query?: Record<string, string>;
   auth?: AuthConfig;

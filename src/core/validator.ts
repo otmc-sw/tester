@@ -48,11 +48,21 @@ export class ResponseValidator implements IValidator {
     };
   }
 
-  validateStatus(actual: number, expected?: number): void {
-    if (expected !== undefined && actual !== expected) {
-      throw new StatusValidationError(`Expected status ${expected}, got ${actual}`, {
+  validateStatus(actual: number, expected?: number | number[]): void {
+    if (expected === undefined) {
+      return;
+    }
+
+    const expectedStatuses = Array.isArray(expected) ? expected : [expected];
+
+    if (!expectedStatuses.includes(actual)) {
+      const expectedLabel = expectedStatuses.length === 1
+        ? String(expectedStatuses[0])
+        : `[${expectedStatuses.join(', ')}]`;
+
+      throw new StatusValidationError(`Expected status ${expectedLabel}, got ${actual}`, {
         status: actual,
-        expected,
+        expected: expectedStatuses,
         actual,
       });
     }
