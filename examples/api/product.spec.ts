@@ -7,6 +7,9 @@ import { test } from '@playwright/test';
 import { defineAPIs, createTestCases } from '../../src/index.js';
 import { Product, CreateProductRequest, UpdateProductRequest } from '../types.js';
 import config from '../config.js';
+import { GetTestProductId } from '../utils/prepare.js';
+
+const productId = GetTestProductId();
 
 const suite = defineAPIs([
   {
@@ -116,7 +119,7 @@ const suite = defineAPIs([
 
   {
     title: "Get by ID",
-    GET: "/products/1",
+    GET: `/products/${productId}`,
     response: Product,
     status: 200
   },
@@ -129,7 +132,7 @@ const suite = defineAPIs([
 
   {
     title: "Full update",
-    PUT: "/products/1",
+    PUT: `/products/${productId}`,
     request: {
       name: "Updated Laptop Pro 15",
       description: "Updated description with better specs",
@@ -144,7 +147,7 @@ const suite = defineAPIs([
 
   {
     title: "Partial update - Price only",
-    PATCH: "/products/1",
+    PATCH: `/products/${productId}`,
     request: {
       price: 1099.99
     } as UpdateProductRequest,
@@ -154,7 +157,7 @@ const suite = defineAPIs([
 
   {
     title: "Partial update - Stock only",
-    PATCH: "/products/1",
+    PATCH: `/products/${productId}`,
     request: {
       stock: 40
     } as UpdateProductRequest,
@@ -164,7 +167,7 @@ const suite = defineAPIs([
 
   {
     title: "Deactivate product",
-    PATCH: "/products/1",
+    PATCH: `/products/${productId}`,
     request: {
       isActive: false
     } as UpdateProductRequest,

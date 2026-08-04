@@ -32,7 +32,10 @@ export async function InitializeTestData(request: APIRequestContext): Promise<vo
       save: "product",
       request: {
         name: "Test Product",
-        price: 100
+        description: "Test description",
+        price: 100,
+        stock: 50,
+        category: "electronics"
       } as CreateProductRequest,
       response: Product,
       status: 201

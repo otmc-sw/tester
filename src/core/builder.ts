@@ -4,6 +4,7 @@
  * @Contributors Nguyen Van Trung, OTMC Contributors.
  **/
 import type { IRequestBuilder, NormalizedTestCase } from '../types/api.js';
+import { GetAccessToken } from '../utils/api.js';
 
 export class RequestBuilder implements IRequestBuilder {
   build(testCase: NormalizedTestCase): {
@@ -31,6 +32,15 @@ export class RequestBuilder implements IRequestBuilder {
 
     if (testCase.query !== undefined) {
       options.params = testCase.query;
+    }
+
+    // Automatically inject access token if available
+    const accessToken = GetAccessToken();
+    if (accessToken) {
+      options.headers = {
+        ...options.headers,
+        Authorization: `Bearer ${accessToken}`,
+      };
     }
 
     return options;
