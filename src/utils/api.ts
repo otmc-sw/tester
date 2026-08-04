@@ -33,25 +33,27 @@ export async function CreateObject(
       const createdData = body.data || body;
       const objectId = createdData.id?.toString();
 
-      // Save to data/<object>.json
       const dataDir = path.join(process.cwd(), 'data');
       if (!fs.existsSync(dataDir)) {
         fs.mkdirSync(dataDir, { recursive: true });
       }
       const filePath = path.join(dataDir, `${objectType}.json`);
       fs.writeFileSync(filePath, JSON.stringify(createdData, null, 2));
-
+      console.log(`[Tester] ✅ Saved '${objectType}' to: ${filePath}`);
       return {
         success: true,
         id: objectId
       };
     }
 
+    const body = await response.json();
+    console.log(`[Tester] ❌ Failed to create ${objectType}: status ${response.status()}\n${body}`);
     return {
       success: false,
       error: `Failed with status ${response.status()}`
     };
   } catch (error) {
+    console.log(`[Tester] ❌ Failed to create ${objectType}: ${error instanceof Error ? error.message : error}`);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error'
@@ -69,7 +71,7 @@ export function GetObject(objectType: string): string {
       }
     }
   } catch (error) {
-    console.warn(`⚠️ Could not read ${objectType} ID: ${error instanceof Error ? error.message : error}`);
+    console.warn(`[Tester] ⚠️ Could not read ${objectType} ID: ${error instanceof Error ? error.message : error}`);
   }
   return '999999';
 }
