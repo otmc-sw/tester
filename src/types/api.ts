@@ -16,6 +16,7 @@ export interface NormalizedTestCase {
   query?: Record<string, string>;
   auth?: unknown;
   phase?: string;
+  save?: string;
 }
 
 export interface IRequestBuilder {

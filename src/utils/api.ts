@@ -5,10 +5,7 @@
  **/
 import fs from 'fs';
 import path from 'path';
-import type { APIRequestContext } from 'playwright';
-import type { NormalizedTestCase } from '../types/api.js';
-import { Executor } from '../core/executor.js';
-import { Reporter } from '../core/reporter.js';
+import type { APIRequestContext, APIResponse } from 'playwright';
 
 export interface CreateObjectOptions {
   data: Record<string, unknown>;
@@ -20,25 +17,63 @@ export interface CreateObjectResult {
   error?: string;
 }
 
+async function parseResponse(response: APIResponse): Promise<unknown> {
+  const contentType = response.headers()['content-type'] || '';
+
+  if (contentType.includes('application/json')) {
+    try {
+      return await response.json();
+    } catch {
+      throw new Error('Failed to parse JSON response');
+    }
+  }
+
+  if (contentType.includes('text/')) {
+    return await response.text();
+  }
+
+  return await response.body();
+}
+
 export async function CreateObject(
   request: APIRequestContext,
   objectType: string,
   url: string,
   reqData: Record<string, unknown>,
 ): Promise<CreateObjectResult> {
-  const reporter = new Reporter();
-  const executor = new Executor(reporter);
-
-  const testCase: NormalizedTestCase = {
-    title: `Create ${objectType}`,
-    method: 'POST',
-    url,
-    request: reqData,
-    status: [200, 201]
-  };
+  const startTime = Date.now();
 
   try {
-    const responseBody = await executor.execute<unknown>(request, testCase);
+    const response = await request.fetch(url, {
+      method: 'POST',
+      data: reqData,
+    });
+    const duration = Date.now() - startTime;
+
+    const status = response.status();
+    const validStatuses = [200, 201];
+    if (!validStatuses.includes(status)) {
+      const errorMessage = `Unexpected status: ${status}`;
+      console.log(`[Tester] ❌ Failed to create ${objectType}: ${errorMessage}`);
+      return {
+        success: false,
+        error: errorMessage
+      };
+    }
+
+    let responseBody: unknown;
+    if (status !== 204) {
+      try {
+        responseBody = await parseResponse(response);
+      } catch (error) {
+        const parseError = error instanceof Error ? error.message : 'Parse error';
+        console.log(`[Tester] ❌ Failed to parse response for ${objectType}: ${parseError}`);
+        return {
+          success: false,
+          error: parseError
+        };
+      }
+    }
 
     if (responseBody === undefined) {
       return {
@@ -108,19 +143,33 @@ export async function Login(
   url: string,
   req: { username: string; password: string }
 ): Promise<string> {
-  const reporter = new Reporter();
-  const executor = new Executor(reporter);
-
-  const testCase: NormalizedTestCase = {
-    title: 'Login',
-    method: 'POST',
-    url,
-    request: req,
-    status: [200, 201]
-  };
+  const startTime = Date.now();
 
   try {
-    const responseBody = await executor.execute<unknown>(request, testCase);
+    const response = await request.fetch(url, {
+      method: 'POST',
+      data: req,
+    });
+    const duration = Date.now() - startTime;
+
+    const status = response.status();
+    const validStatuses = [200, 201];
+    if (!validStatuses.includes(status)) {
+      const errorMessage = `Unexpected status: ${status}`;
+      console.log(`[Tester] ❌ Login failed: ${errorMessage}`);
+      return `Error: ${errorMessage}`;
+    }
+
+    let responseBody: unknown;
+    if (status !== 204) {
+      try {
+        responseBody = await parseResponse(response);
+      } catch (error) {
+        const parseError = error instanceof Error ? error.message : 'Parse error';
+        console.log(`[Tester] ❌ Failed to parse login response: ${parseError}`);
+        return `Error: ${parseError}`;
+      }
+    }
 
     if (responseBody === undefined) {
       return 'Error: Empty or invalid response body';

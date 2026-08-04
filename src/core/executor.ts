@@ -12,6 +12,8 @@ import { ResponseValidator } from './validator.js';
 import { ResponseMapper } from './mapper.js';
 import { Reporter } from './reporter.js';
 import { StatusValidationError, ApiError } from '../errors/index.js';
+import { writeFile, mkdir } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
 
 export class Executor {
   private requestBuilder: RequestBuilder;
@@ -28,6 +30,19 @@ export class Executor {
     this.responseValidator = new ResponseValidator();
     this.responseMapper = new ResponseMapper();
     this.reporter = reporter;
+  }
+
+  private async saveResponse(saveKey: string, data: unknown): Promise<void> {
+    const saveDir = join(process.cwd(), 'data');
+    const savePath = join(saveDir, `${saveKey}.json`);
+    
+    try {
+      await mkdir(saveDir, { recursive: true });
+    } catch {
+      // Directory might already exist
+    }
+    
+    await writeFile(savePath, JSON.stringify(data, null, 2), 'utf-8');
   }
 
   async execute<T>(request: APIRequestContext, testCase: NormalizedTestCase): Promise<T> {
@@ -68,6 +83,7 @@ export class Executor {
         this.responseValidator.validateContentType(response.headers()['content-type'] || '');
       }
 
+      let result: T;
       if (testCase.response) {
         const envelopeResult = this.envelopeProcessor.process<T>(responseBody);
 
@@ -100,10 +116,16 @@ export class Executor {
           );
         }
 
-        return this.responseMapper.map<T>(envelopeResult.data, testCase.response as new () => T);
+        result = this.responseMapper.map<T>(envelopeResult.data, testCase.response as new () => T);
+      } else {
+        result = responseBody as T;
       }
 
-      return responseBody as T;
+      if (testCase.save) {
+        await this.saveResponse(testCase.save, result);
+      }
+
+      return result;
     } catch (error) {
       const duration = Date.now() - startTime;
       this.reporter.logError(error as Error, { duration });

@@ -21,6 +21,7 @@ export function normalize(testCase: APITestCase): NormalizedTestCase {
     query: testCase.query,
     auth: testCase.auth,
     phase: testCase.phase,
+    save: testCase.save,
   };
 }
 

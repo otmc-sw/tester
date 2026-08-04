@@ -59,6 +59,7 @@ export interface APITestCase<TRequest = unknown, TResponse extends object = obje
   headers?: Record<string, string>;
   query?: Record<string, string>;
   auth?: AuthConfig;
+  save?: string;
 }
 
 export interface ProjectConfig {

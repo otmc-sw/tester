@@ -16,7 +16,7 @@ export async function GlobalSetup(context: any ): Promise<void> {
 
   try {
     ResetDatabase();
-    
+
     console.log('🔐 Logging in...');
     Login(context, '/login', {username: 'admin_user', password: 'SecurePass123!'});
     
