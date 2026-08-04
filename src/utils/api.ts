@@ -6,6 +6,9 @@
 import fs from 'fs';
 import path from 'path';
 import type { APIRequestContext } from 'playwright';
+import type { NormalizedTestCase } from '../types/api.js';
+import { Executor } from '../core/executor.js';
+import { Reporter } from '../core/reporter.js';
 
 export interface CreateObjectOptions {
   data: Record<string, unknown>;
@@ -23,40 +26,53 @@ export async function CreateObject(
   url: string,
   reqData: Record<string, unknown>,
 ): Promise<CreateObjectResult> {
+  const reporter = new Reporter();
+  const executor = new Executor(reporter);
+
+  const testCase: NormalizedTestCase = {
+    title: `Create ${objectType}`,
+    method: 'POST',
+    url,
+    request: reqData,
+    status: [200, 201]
+  };
+
   try {
-    const response = await request.post(url, {
-      data: reqData
-    });
+    const responseBody = await executor.execute<unknown>(request, testCase);
 
-    if (response.status() === 201 || response.status() === 200) {
-      const body = await response.json();
-      const createdData = body.data || body;
-      const objectId = createdData.id?.toString();
-
-      const dataDir = path.join(process.cwd(), 'data');
-      if (!fs.existsSync(dataDir)) {
-        fs.mkdirSync(dataDir, { recursive: true });
-      }
-      const filePath = path.join(dataDir, `${objectType}.json`);
-      fs.writeFileSync(filePath, JSON.stringify(createdData, null, 2));
-      console.log(`[Tester] ✅ Saved '${objectType}' to: ${filePath}`);
+    if (responseBody === undefined) {
       return {
-        success: true,
-        id: objectId
+        success: false,
+        error: 'Empty or invalid response body'
       };
     }
 
-    const body = await response.json();
-    console.log(`[Tester] ❌ Failed to create ${objectType}: status ${response.status()}\n${body}`);
+    const createdData = typeof responseBody === 'object' && responseBody !== null && !Array.isArray(responseBody)
+      ? (responseBody as Record<string, unknown>).data || responseBody
+      : responseBody;
+
+    const objectId = typeof createdData === 'object' && createdData !== null && 'id' in createdData
+      ? (createdData as Record<string, unknown>).id?.toString()
+      : undefined;
+
+    const dataDir = path.join(process.cwd(), 'data');
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    const filePath = path.join(dataDir, `${objectType}.json`);
+    fs.writeFileSync(filePath, JSON.stringify(createdData, null, 2));
+    console.log(`[Tester] ✅ Saved '${objectType}' to: ${filePath}`);
+
     return {
-      success: false,
-      error: `Failed with status ${response.status()}`
+      success: true,
+      id: objectId
     };
   } catch (error) {
-    console.log(`[Tester] ❌ Failed to create ${objectType}: ${error instanceof Error ? error.message : error}`);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.log(`[Tester] ❌ Failed to create ${objectType}: ${errorMessage}`);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: errorMessage
     };
   }
 }

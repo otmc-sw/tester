@@ -3,34 +3,32 @@
  * @Copyright (c) 2026 OTMC Softwares. All rights reserved.
  * @Contributors Nguyen Van Trung, OTMC Authors.
 **/
+
 import { request, FullConfig } from '@playwright/test';
+import { GlobalSetup } from './utils/prepare.js';
 import fs from 'fs';
 import path from 'path';
-import { GlobalSetup } from './utils/prepare.js';
 
-export default async function globalSetup(config: FullConfig) {
-  const baseURL = config.projects[0].use.baseURL || 'http://localhost:3000';
-  
-  const dataDir = path.join(process.cwd(), 'data');
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
-  
+function resetDatabase() {
   const templatePath = path.join(process.cwd(), 'db.template.json');
-  const dbPath = path.join(dataDir, 'data.json');
+  const dbPath = path.join(process.cwd(), 'data', 'data.json');
   
   console.log('🔄 Resetting database from template...');
   fs.copyFileSync(templatePath, dbPath);
   console.log('✅ Database reset complete');
-  
-  console.log(`🔍 Testing connection to ${baseURL}...`);
+}
 
+export default async function globalSetup(config: FullConfig) {
+  const baseURL = config.projects[0].use.baseURL || 'http://localhost:5007';
+  console.log(`🔍 Testing connection to ${baseURL}...`);
+  
   try {
     const context = await request.newContext({ baseURL });
     const response = await context.get('/users', { timeout: 5000 });
 
     if (response.status() < 500) {
       console.log(`✅ Server is reachable at ${baseURL} (status: ${response.status()})`);
+      resetDatabase();
       await GlobalSetup(context);
       await context.dispose();
       return;
