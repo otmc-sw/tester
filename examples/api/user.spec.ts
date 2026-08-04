@@ -7,6 +7,9 @@ import { test } from '@playwright/test';
 import { defineAPIs, createTestCases } from '@otmc-sw/tester';
 import { User, CreateUserRequest, UpdateUserRequest } from '../types.js';
 import config from '../config.js';
+import { GetTestUserId } from '../utils/prepare.js';
+
+const userId = GetTestUserId();
 
 const suite = defineAPIs([
   {
@@ -85,7 +88,7 @@ const suite = defineAPIs([
 
   {
     title: "Get User - By ID",
-    GET: "/users/1",
+    GET: `/users/${userId}`,
     response: User,
     status: 200
   },
@@ -98,7 +101,7 @@ const suite = defineAPIs([
 
   {
     title: "Update User - Full update",
-    PUT: "/users/1",
+    PUT: `/users/${userId}`,
     request: {
       username: "updated_admin",
       email: "updated_admin@example.com",
@@ -111,7 +114,7 @@ const suite = defineAPIs([
 
   {
     title: "Update User - Partial update - Email only",
-    PATCH: "/users/1",
+    PATCH: `/users/${userId}`,
     request: {
       email: "new_email@example.com"
     } as UpdateUserRequest,
@@ -121,7 +124,7 @@ const suite = defineAPIs([
 
   {
     title: "Update User - Partial update - Role only",
-    PATCH: "/users/1",
+    PATCH: `/users/${userId}`,
     request: {
       role: "moderator"
     } as UpdateUserRequest,
@@ -130,9 +133,9 @@ const suite = defineAPIs([
   },
 
   {
-    title: "Delete User - Non-existent user",
-    DELETE: "/users/99999",
-    status: 404
+    title: "Delete User - Existing user",
+    DELETE: `/users/${userId}`,
+    status: 204
   }
 ], config);
 

@@ -6,6 +6,7 @@
 import { request, FullConfig } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
+import { CreateUser } from './utils/prepare.js';
 
 export default async function globalSetup(config: FullConfig) {
   const baseURL = config.projects[0].use.baseURL || 'http://localhost:3000';
@@ -30,6 +31,8 @@ export default async function globalSetup(config: FullConfig) {
 
     if (response.status() < 500) {
       console.log(`✅ Server is reachable at ${baseURL} (status: ${response.status()})`);
+      await CreateUser();
+      await context.dispose();
       return;
     }
 
