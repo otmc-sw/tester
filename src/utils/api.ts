@@ -112,7 +112,7 @@ export async function CreateObject(
   }
 }
 
-export function GetObject(objectType: string): string {
+export function GetIdByObjectName(objectType: string): string {
   try {
     const filePath = path.join(process.cwd(), 'data', `${objectType}.json`);
     if (fs.existsSync(filePath)) {
@@ -134,7 +134,7 @@ export function GetObject(objectType: string): string {
   } catch (error) {
     console.warn(`⚠️ Could not read ${objectType} ID: ${error instanceof Error ? error.message : error}`);
   }
-  return '999999';
+  return 'UnknownID';
 }
 
 export async function Login(
@@ -190,7 +190,7 @@ export async function Login(
   }
 }
 
-export function GetAccessToken(): string {
+export function GetAccessTokenByObjectName(): string {
   try {
     const filePath = path.join(process.cwd(), 'data', 'login.json');
     if (fs.existsSync(filePath)) {

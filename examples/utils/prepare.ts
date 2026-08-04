@@ -3,7 +3,7 @@
  * @Copyright (c) 2026 OTMC Softwares.
  * @Contributors Nguyen Van Trung, OTMC Contributors.
  **/
-import { GetObject, Login } from '../../src/index.js';
+import { GetIdByObjectName, Login } from '../../src/index.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -31,9 +31,9 @@ export async function GlobalSetup(context: any ): Promise<void> {
 }
 
 export function GetTestUserId(): string {
-  return GetObject('user');
+  return GetIdByObjectName('user');
 }
 
 export function GetTestProductId(): string {
-  return GetObject('product');
+  return GetIdByObjectName('product');
 }
