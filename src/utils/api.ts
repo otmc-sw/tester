@@ -54,7 +54,7 @@ export async function CreateObject(
     const validStatuses = [200, 201];
     if (!validStatuses.includes(status)) {
       const errorMessage = `Unexpected status: ${status}`;
-      console.log(`[Tester] ❌ Failed to create ${objectType}: ${errorMessage}`);
+      console.log(`❌ Failed to create ${objectType}: ${errorMessage}`);
       return {
         success: false,
         error: errorMessage
@@ -67,7 +67,7 @@ export async function CreateObject(
         responseBody = await parseResponse(response);
       } catch (error) {
         const parseError = error instanceof Error ? error.message : 'Parse error';
-        console.log(`[Tester] ❌ Failed to parse response for ${objectType}: ${parseError}`);
+        console.log(`❌ Failed to parse response for ${objectType}: ${parseError}`);
         return {
           success: false,
           error: parseError
@@ -96,7 +96,7 @@ export async function CreateObject(
     }
     const filePath = path.join(dataDir, `${objectType}.json`);
     fs.writeFileSync(filePath, JSON.stringify(createdData, null, 2));
-    console.log(`[Tester] ✅ Saved '${objectType}' to: ${filePath}`);
+    console.log(`✅ Saved '${objectType}' to: ${filePath}`);
 
     return {
       success: true,
@@ -104,7 +104,7 @@ export async function CreateObject(
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.log(`[Tester] ❌ Failed to create ${objectType}: ${errorMessage}`);
+    console.log(`❌ Failed to create ${objectType}: ${errorMessage}`);
     return {
       success: false,
       error: errorMessage
@@ -118,7 +118,6 @@ export function GetObject(objectType: string): string {
     if (fs.existsSync(filePath)) {
       const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
       
-      // Keyword matching for ID field
       const idKeywords = ['id', 'ID', 'Id', '_id', 'ID', 'identifier', 'objectId', 'recordId'];
       const createdData = typeof data === 'object' && data !== null && !Array.isArray(data)
         ? (data as Record<string, unknown>).data || data
@@ -133,7 +132,7 @@ export function GetObject(objectType: string): string {
       }
     }
   } catch (error) {
-    console.warn(`[Tester] ⚠️ Could not read ${objectType} ID: ${error instanceof Error ? error.message : error}`);
+    console.warn(`⚠️ Could not read ${objectType} ID: ${error instanceof Error ? error.message : error}`);
   }
   return '999999';
 }
@@ -156,7 +155,7 @@ export async function Login(
     const validStatuses = [200, 201];
     if (!validStatuses.includes(status)) {
       const errorMessage = `Unexpected status: ${status}`;
-      console.log(`[Tester] ❌ Login failed: ${errorMessage}`);
+      console.log(`❌ Login failed: ${errorMessage}`);
       return `Error: ${errorMessage}`;
     }
 
@@ -166,7 +165,7 @@ export async function Login(
         responseBody = await parseResponse(response);
       } catch (error) {
         const parseError = error instanceof Error ? error.message : 'Parse error';
-        console.log(`[Tester] ❌ Failed to parse login response: ${parseError}`);
+        console.log(`❌ Failed to parse login response: ${parseError}`);
         return `Error: ${parseError}`;
       }
     }
@@ -181,12 +180,12 @@ export async function Login(
     }
     const filePath = path.join(dataDir, 'login.json');
     fs.writeFileSync(filePath, JSON.stringify(responseBody, null, 2));
-    console.log(`[Tester] ✅ Saved login response to: ${filePath}`);
+    console.log(`✅ Saved login response to: ${filePath}`);
 
     return 'OK';
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.log(`[Tester] ❌ Login failed: ${errorMessage}`);
+    console.log(`❌ Login failed: ${errorMessage}`);
     return `Error: ${errorMessage}`;
   }
 }
@@ -197,7 +196,6 @@ export function GetAccessToken(): string {
     if (fs.existsSync(filePath)) {
       const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
       
-      // Check nested data object first (common pattern: { data: { access_token: ... } })
       const nestedData = typeof data === 'object' && data !== null && !Array.isArray(data)
         ? (data as Record<string, unknown>).data
         : undefined;
@@ -231,7 +229,7 @@ export function GetAccessToken(): string {
       }
     }
   } catch (error) {
-    console.warn(`[Tester] ⚠️ Could not read access token: ${error instanceof Error ? error.message : error}`);
+    console.warn(`⚠️ Could not read access token: ${error instanceof Error ? error.message : error}`);
   }
   return '';
 }

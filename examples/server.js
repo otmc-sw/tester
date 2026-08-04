@@ -36,7 +36,6 @@ const saveData = () => {
 const generateId = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
 
 const authMiddleware = (req, res, next) => {
-  // Skip authentication for login endpoint
   if (req.path === '/login' || req.path === '/reset-db') {
     return next();
   }
@@ -49,13 +48,10 @@ const authMiddleware = (req, res, next) => {
 
   const token = authHeader.substring(7);
   
-  // Accept any token that looks like a Bearer token for testing purposes
-  // In production, you would validate the token properly
   if (token.length === 0) {
     return sendError(res, 'Invalid authorization token', 401);
   }
 
-  // Token is valid, proceed to the route handler
   next();
 };
 
@@ -105,7 +101,6 @@ const validateUser = (user) => {
   return { valid: true };
 };
 
-// Apply authentication middleware to all routes
 app.use(authMiddleware);
 
 const sendSuccess = (res, data, message = 'Success', statusCode = 200) => {

@@ -39,7 +39,6 @@ export class Executor {
     try {
       await mkdir(saveDir, { recursive: true });
     } catch {
-      // Directory might already exist
     }
     
     await writeFile(savePath, JSON.stringify(data, null, 2), 'utf-8');

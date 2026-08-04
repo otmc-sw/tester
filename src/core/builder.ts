@@ -34,7 +34,6 @@ export class RequestBuilder implements IRequestBuilder {
       options.params = testCase.query;
     }
 
-    // Automatically inject access token if available
     const accessToken = GetAccessToken();
     if (accessToken) {
       options.headers = {
