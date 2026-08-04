@@ -91,3 +91,60 @@ export function GetObject(objectType: string): string {
   }
   return '999999';
 }
+
+export async function Login(
+  request: APIRequestContext,
+  url: string,
+  req: { username: string; password: string }
+): Promise<string> {
+  const reporter = new Reporter();
+  const executor = new Executor(reporter);
+
+  const testCase: NormalizedTestCase = {
+    title: 'Login',
+    method: 'POST',
+    url,
+    request: req,
+    status: [200, 201]
+  };
+
+  try {
+    const responseBody = await executor.execute<unknown>(request, testCase);
+
+    if (responseBody === undefined) {
+      return 'Error: Empty or invalid response body';
+    }
+
+    const dataDir = path.join(process.cwd(), 'data');
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    const filePath = path.join(dataDir, 'login.json');
+    fs.writeFileSync(filePath, JSON.stringify(responseBody, null, 2));
+    console.log(`[Tester] ✅ Saved login response to: ${filePath}`);
+
+    return 'OK';
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.log(`[Tester] ❌ Login failed: ${errorMessage}`);
+    return `Error: ${errorMessage}`;
+  }
+}
+
+export function GetAuthKey(): string {
+  try {
+    const filePath = path.join(process.cwd(), 'data', 'login.json');
+    if (fs.existsSync(filePath)) {
+      const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      const authKey = typeof data === 'object' && data !== null && !Array.isArray(data)
+        ? (data as Record<string, unknown>).token || (data as Record<string, unknown>).access_token || (data as Record<string, unknown>).authKey
+        : undefined;
+      if (authKey && typeof authKey === 'string') {
+        return authKey;
+      }
+    }
+  } catch (error) {
+    console.warn(`[Tester] ⚠️ Could not read auth key: ${error instanceof Error ? error.message : error}`);
+  }
+  return '';
+}

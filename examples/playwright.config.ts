@@ -4,6 +4,9 @@
  * @Contributors Nguyen Van Trung, OTMC Authors.
 **/
 import { defineConfig, devices } from '@playwright/test';
+import { GetAuthKey } from '../src/utils/api';
+
+const authToken = GetAuthKey();
 
 export default defineConfig({
   fullyParallel: false,
@@ -15,9 +18,9 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
-    extraHTTPHeaders: {
-      Authorization: 'Bearer your-token-here'
-    }
+    extraHTTPHeaders: authToken
+      ? { Authorization: `Bearer ${authToken}` }
+      : {},
   },
 
   projects: [

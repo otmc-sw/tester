@@ -96,6 +96,36 @@ app.post('/reset-db', (req, res) => {
   }
 });
 
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return sendError(res, 'Username and password are required', 400);
+  }
+
+  const user = db.users.find(u => u.username === username);
+
+  if (!user) {
+    return sendError(res, 'Invalid username or password', 401);
+  }
+
+  if (user.password !== password) {
+    return sendError(res, 'Invalid username or password', 401);
+  }
+
+  sendSuccess(res, {
+    access_token: 'test_token_123',
+    refresh_token: 'refresh_token_123',
+    token_type: 'Bearer',
+    expires_in: 5184000,
+    username: user.username,
+    fullname: user.fullname || user.username,
+    email: user.email,
+    avatar: user.avatar || '',
+    provider: 'OTMC'
+  }, 'Login successful');
+});
+
 app.get('/users', (req, res) => {
   let users = [...db.users];
   
