@@ -82,8 +82,19 @@ export function GetObject(objectType: string): string {
     const filePath = path.join(process.cwd(), 'data', `${objectType}.json`);
     if (fs.existsSync(filePath)) {
       const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-      if (data.id) {
-        return data.id;
+      
+      // Keyword matching for ID field
+      const idKeywords = ['id', 'ID', 'Id', '_id', 'ID', 'identifier', 'objectId', 'recordId'];
+      const createdData = typeof data === 'object' && data !== null && !Array.isArray(data)
+        ? (data as Record<string, unknown>).data || data
+        : data;
+      
+      if (typeof createdData === 'object' && createdData !== null) {
+        for (const keyword of idKeywords) {
+          if (keyword in createdData && (createdData as Record<string, unknown>)[keyword]) {
+            return (createdData as Record<string, unknown>)[keyword]!.toString();
+          }
+        }
       }
     }
   } catch (error) {
@@ -131,20 +142,47 @@ export async function Login(
   }
 }
 
-export function GetAuthKey(): string {
+export function GetAccessToken(): string {
   try {
     const filePath = path.join(process.cwd(), 'data', 'login.json');
     if (fs.existsSync(filePath)) {
       const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-      const authKey = typeof data === 'object' && data !== null && !Array.isArray(data)
-        ? (data as Record<string, unknown>).token || (data as Record<string, unknown>).access_token || (data as Record<string, unknown>).authKey
+      
+      // Check nested data object first (common pattern: { data: { access_token: ... } })
+      const nestedData = typeof data === 'object' && data !== null && !Array.isArray(data)
+        ? (data as Record<string, unknown>).data
         : undefined;
-      if (authKey && typeof authKey === 'string') {
-        return authKey;
+      
+      const searchTarget = typeof nestedData === 'object' && nestedData !== null && !Array.isArray(nestedData)
+        ? nestedData as Record<string, unknown>
+        : (typeof data === 'object' && data !== null && !Array.isArray(data)
+          ? data as Record<string, unknown>
+          : null);
+      
+      if (searchTarget) {
+        const tokenKeywords = [
+          'token', 'Token', 'TOKEN',
+          'access_token', 'accessToken', 'AccessToken', 'ACCESS_TOKEN',
+          'accesstoken', 'access-token',
+          'jwt', 'JWT',
+          'bearer', 'Bearer',
+          'auth_token', 'authToken', 'auth',
+          'session_token', 'sessionToken', 'session',
+          'api_key', 'apiKey', 'apikey'
+        ];
+        
+        for (const keyword of tokenKeywords) {
+          if (keyword in searchTarget && searchTarget[keyword]) {
+            const value = searchTarget[keyword];
+            if (typeof value === 'string') {
+              return value;
+            }
+          }
+        }
       }
     }
   } catch (error) {
-    console.warn(`[Tester] ⚠️ Could not read auth key: ${error instanceof Error ? error.message : error}`);
+    console.warn(`[Tester] ⚠️ Could not read access token: ${error instanceof Error ? error.message : error}`);
   }
   return '';
 }

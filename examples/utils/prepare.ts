@@ -1,11 +1,24 @@
 import { CreateObject, GetObject, Login } from '../../src/index.js';
+import fs from 'fs';
+import path from 'path';
+
+function ResetDatabase() {
+  const templatePath = path.join(process.cwd(), 'db.template.json');
+  const dbPath = path.join(process.cwd(), 'data', 'data.json');
+  
+  console.log('🔄 Resetting database from template...');
+  fs.copyFileSync(templatePath, dbPath);
+  console.log('✅ Database reset complete');
+}
 
 export async function GlobalSetup(context: any ): Promise<void> {
   console.log('🚀 Starting global setup...');
 
   try {
+    ResetDatabase();
+    
     console.log('🔐 Logging in...');
-    Login(context, '/login', {username: 'admin', password: 'admin'});
+    Login(context, '/login', {username: 'admin_user', password: 'SecurePass123!'});
     
     console.log('📋 Creating test user...');
     await CreateObject(context, 'user', '/users', {

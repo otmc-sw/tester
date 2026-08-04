@@ -3,9 +3,13 @@
  * @Copyright (c) 2026 OTMC Softwares.
  * @Contributors Nguyen Van Trung, OTMC Contributors.
  **/
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
+import express from 'express';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = 3000;
@@ -30,6 +34,30 @@ const saveData = () => {
 };
 
 const generateId = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
+
+const authMiddleware = (req, res, next) => {
+  // Skip authentication for login endpoint
+  if (req.path === '/login' || req.path === '/reset-db') {
+    return next();
+  }
+
+  const authHeader = req.headers.authorization;
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return sendError(res, 'Missing or invalid authorization token', 401);
+  }
+
+  const token = authHeader.substring(7);
+  
+  // Accept any token that looks like a Bearer token for testing purposes
+  // In production, you would validate the token properly
+  if (token.length === 0) {
+    return sendError(res, 'Invalid authorization token', 401);
+  }
+
+  // Token is valid, proceed to the route handler
+  next();
+};
 
 const isValidEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -76,6 +104,9 @@ const validateUser = (user) => {
   }
   return { valid: true };
 };
+
+// Apply authentication middleware to all routes
+app.use(authMiddleware);
 
 const sendSuccess = (res, data, message = 'Success', statusCode = 200) => {
   res.status(statusCode).json({ success: true, message, data });

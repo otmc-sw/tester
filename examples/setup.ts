@@ -6,29 +6,18 @@
 
 import { request, FullConfig } from '@playwright/test';
 import { GlobalSetup } from './utils/prepare.js';
-import fs from 'fs';
-import path from 'path';
 
-function resetDatabase() {
-  const templatePath = path.join(process.cwd(), 'db.template.json');
-  const dbPath = path.join(process.cwd(), 'data', 'data.json');
-  
-  console.log('🔄 Resetting database from template...');
-  fs.copyFileSync(templatePath, dbPath);
-  console.log('✅ Database reset complete');
-}
 
 export default async function globalSetup(config: FullConfig) {
   const baseURL = config.projects[0].use.baseURL || 'http://localhost:5007';
   console.log(`🔍 Testing connection to ${baseURL}...`);
-  
+
   try {
     const context = await request.newContext({ baseURL });
     const response = await context.get('/users', { timeout: 5000 });
 
     if (response.status() < 500) {
       console.log(`✅ Server is reachable at ${baseURL} (status: ${response.status()})`);
-      resetDatabase();
       await GlobalSetup(context);
       await context.dispose();
       return;

@@ -4,9 +4,10 @@
  * @Contributors Nguyen Van Trung, OTMC Authors.
 **/
 import { defineConfig, devices } from '@playwright/test';
-import { GetAuthKey } from '../src/utils/api';
+import { GetAccessToken } from '../src/utils/api';
 
-const authToken = GetAuthKey();
+const accessToken = GetAccessToken();
+console.log('Access Token:', accessToken);
 
 export default defineConfig({
   fullyParallel: false,
@@ -18,8 +19,8 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
-    extraHTTPHeaders: authToken
-      ? { Authorization: `Bearer ${authToken}` }
+    extraHTTPHeaders: accessToken
+      ? { Authorization: `Bearer ${accessToken}` }
       : {},
   },
 
