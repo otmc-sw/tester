@@ -3,7 +3,7 @@
  * @Copyright (c) 2026 OTMC Softwares.
  * @Contributors Nguyen Van Trung, OTMC Contributors.
  **/
-import type { APITestCase } from '../types/config.js';
+import type { APITestCase, TestPhase } from '../types/config.js';
 import type { NormalizedTestCase } from '../types/api.js';
 
 export function normalize(testCase: APITestCase): NormalizedTestCase {
@@ -20,6 +20,7 @@ export function normalize(testCase: APITestCase): NormalizedTestCase {
     headers: testCase.headers,
     query: testCase.query,
     auth: testCase.auth,
+    phase: testCase.phase,
   };
 }
 

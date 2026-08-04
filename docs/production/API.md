@@ -364,6 +364,27 @@ response (if available)
 status
 ```
 
+### Test Phases
+
+You can optionally specify a `phase` property to control test execution order:
+
+- `'Pre'` - Runs first (setup/teardown operations)
+- `'Main'` - Main test cases (default if not specified)
+- `'Post'` - Runs last (cleanup operations)
+
+Tests are automatically sorted by phase: **Pre → Main → Post**
+
+Example:
+
+```ts
+{
+    title: "Delete User - Existing user",
+    phase: 'Post',
+    DELETE: `/users/${userId}`,
+    status: 204
+}
+```
+
 `status` accepts either a single number or an array of numbers:
 
 ```ts

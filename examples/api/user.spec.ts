@@ -134,6 +134,7 @@ const suite = defineAPIs([
 
   {
     title: "Delete User - Existing user",
+    phase: 'Post',
     DELETE: `/users/${userId}`,
     status: 204
   }

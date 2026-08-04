@@ -41,8 +41,11 @@ export interface AuthConfig {
   apiKeyHeader?: string;
 }
 
+export type TestPhase = 'Pre' | 'Post' | 'Main';
+
 export interface APITestCase<TRequest = unknown, TResponse extends object = object> {
   title: string;
+  phase?: TestPhase;
   GET?: string;
   POST?: string;
   PUT?: string;

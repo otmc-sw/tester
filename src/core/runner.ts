@@ -4,7 +4,7 @@
  * @Contributors Nguyen Van Trung, OTMC Contributors.
  **/
 import type { APIRequestContext } from '@playwright/test';
-import type { APISuite } from '../types/config.js';
+import type { APISuite, TestPhase } from '../types/config.js';
 import { Executor } from './executor.js';
 import { Reporter } from './reporter.js';
 import { normalize } from './normalizer.js';
@@ -61,7 +61,8 @@ async function executeTestCase(
 export function createTestCases(suite: APISuite) {
   const { executor, reporter } = createExecutor(suite);
 
-  const testCases = suite.tests.map((tc) => {
+  const sortedTests = sortTestsByPhase(suite.tests);
+  const testCases = sortedTests.map((tc) => {
     const normalized = normalize(tc);
     return {
       title: normalized.title,
@@ -110,7 +111,9 @@ function runTests(
 ): void {
   const location = callerLocation || getCallerLocation();
 
-  for (const testCase of suite.tests) {
+  const sortedTests = sortTestsByPhase(suite.tests);
+
+  for (const testCase of sortedTests) {
     const normalized = normalize(testCase);
     testFn(
       normalized.title,
@@ -122,6 +125,20 @@ function runTests(
   }
 
   reporter.onSuiteComplete();
+}
+
+function sortTestsByPhase(tests: APISuite['tests']): APISuite['tests'] {
+  const phaseOrder: Record<TestPhase | string, number> = {
+    'Pre': 0,
+    'Main': 1,
+    'Post': 2
+  };
+
+  return [...tests].sort((a, b) => {
+    const phaseA = a.phase || 'Main';
+    const phaseB = b.phase || 'Main';
+    return (phaseOrder[phaseA] || 1) - (phaseOrder[phaseB] || 1);
+  });
 }
 
 export function run(
