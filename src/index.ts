@@ -5,3 +5,4 @@
  **/
 export { defineConfig, defineAPIs } from './define.js';
 export { run, createTestCases } from './run.js';
+export * from './utils/index.js';
