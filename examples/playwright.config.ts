@@ -4,9 +4,9 @@
  * @Contributors Nguyen Van Trung, OTMC Authors.
 **/
 import { defineConfig, devices } from '@playwright/test';
-import { GetAccessTokenByObjectName } from '../src/utils/api';
+import { GetAccessToken } from '../src/utils/api';
 
-const accessToken = GetAccessTokenByObjectName();
+const accessToken = GetAccessToken();
 console.log('Access Token:', accessToken);
 
 export default defineConfig({

@@ -7,16 +7,6 @@ import fs from 'fs';
 import path from 'path';
 import type { APIRequestContext, APIResponse } from 'playwright';
 
-export interface CreateObjectOptions {
-  data: Record<string, unknown>;
-}
-
-export interface CreateObjectResult {
-  success: boolean;
-  id?: string;
-  error?: string;
-}
-
 async function parseResponse(response: APIResponse): Promise<unknown> {
   const contentType = response.headers()['content-type'] || '';
 

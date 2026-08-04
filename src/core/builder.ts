@@ -4,7 +4,7 @@
  * @Contributors Nguyen Van Trung, OTMC Contributors.
  **/
 import type { IRequestBuilder, NormalizedTestCase } from '../types/api.js';
-import { GetAccessTokenByObjectName } from '../utils/api.js';
+import { GetAccessToken } from '../utils/api.js';
 
 export class RequestBuilder implements IRequestBuilder {
   build(testCase: NormalizedTestCase): {
@@ -34,7 +34,7 @@ export class RequestBuilder implements IRequestBuilder {
       options.params = testCase.query;
     }
 
-    const accessToken = GetAccessTokenByObjectName();
+    const accessToken = GetAccessToken();
     if (accessToken) {
       options.headers = {
         ...options.headers,

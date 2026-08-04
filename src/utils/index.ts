@@ -7,4 +7,4 @@ export { deepClone, merge, pick, omit } from './object.js';
 export { capitalize, camelCase, kebabCase, snakeCase, truncate, isEmpty } from './string.js';
 export { joinURL, buildQuery, parseQuery, isValidURL } from './url.js';
 export { now, formatDuration, sleep, timestamp } from './time.js';
-export { CreateObject, GetIdByObjectName, Login, GetAccessTokenByObjectName } from './api.js';
+export { GetId, Login, GetAccessToken } from './api.js';
