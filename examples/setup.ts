@@ -6,7 +6,7 @@
 
 import { request, FullConfig } from '@playwright/test';
 import { GlobalSetup } from './utils/prepare.js';
-
+import { InitializeTestData } from './utils/initializer.js';
 
 export default async function globalSetup(config: FullConfig) {
   const baseURL = config.projects[0].use.baseURL || 'http://localhost:5007';
@@ -19,6 +19,7 @@ export default async function globalSetup(config: FullConfig) {
     if (response.status() < 500) {
       console.log(`✅ Server is reachable at ${baseURL} (status: ${response.status()})`);
       await GlobalSetup(context);
+      await InitializeTestData(context);
       await context.dispose();
       return;
     }
