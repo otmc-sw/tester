@@ -41,12 +41,12 @@ export class ResponseEnvelopeProcessor {
   private contract: NormalizedContract | false;
 
   constructor(contract?: ResponseContractConfig | false) {
-    if (contract === false) {
+    if (contract === false || contract === undefined) {
       this.contract = false;
       return;
     }
 
-    const rawConfig = contract || {};
+    const rawConfig = contract;
 
     this.contract = {
       success: {

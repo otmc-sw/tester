@@ -62,7 +62,7 @@ export class Executor {
       const duration = Date.now() - startTime;
 
       let responseBody: unknown = undefined;
-      if (response.status() !== 204) {
+      if (testCase.response && response.status() !== 204) {
         try {
           responseBody = await this.responseParser.parse(response);
         } catch {
@@ -78,7 +78,7 @@ export class Executor {
       });
 
       this.responseValidator.validateStatus(response.status(), testCase.status);
-      if (response.status() !== 204) {
+      if (testCase.response && response.status() !== 204) {
         this.responseValidator.validateContentType(response.headers()['content-type'] || '');
       }
 
