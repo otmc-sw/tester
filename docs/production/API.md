@@ -77,13 +77,42 @@ npm install @otmc-sw/tester@latest
 
 ---
 
+### Setup project in `tests/playwright` with files:
+setup.ts
+```ts
+import { request, FullConfig } from '@playwright/test';
+import { InitializeTestData } from './utils/initializer.js';
+
+export default async function globalSetup(config: FullConfig) {
+  const baseURL = config.projects[0].use.baseURL;
+  console.log(`🔍 Testing connection to ${baseURL}...`);
+
+  try {
+    const context = await request.newContext({ baseURL });
+    const response = await context.get('/users', { timeout: 5000 });
+
+    if (response.status() < 500) {
+      console.log(`✅ Server is reachable at ${baseURL} (status: ${response.status()})`);
+      await InitializeTestData(context);
+      await context.dispose();
+      return;
+    }
+
+    throw new Error(`❌ Server returned error status: ${response.status()}`);
+  } catch (error) {
+    console.error(`❌ Failed to setup test environment at ${baseURL}`);
+    console.error(`   Error: ${error instanceof Error ? error.message : error}`);
+    throw error;
+  }
+}
+```
+
 config.ts
 
 ```ts
-import { defineConfig } from '../src/index.js';
+import { defineConfig } from '@otmc-sw/tester';
 
 export default defineConfig({
-  baseURL: 'http://localhost:3000',
   response: {
     success: {
       successField: 'success',
@@ -148,61 +177,103 @@ export interface UpdateUserRequest {
 }
 ```
 
+utils/initializer.ts
+
+```ts
+import { type APIRequestContext } from '@playwright/test';
+import { defineAPIs, createTestCases } from '@otmc-sw/tester';
+import { User, CreateUserRequest, Product, CreateProductRequest } from '../types.js';
+import config from '../config.js';
+
+export async function InitializeTestData(request: APIRequestContext): Promise<void> {
+  console.log('🔧 Initializing test data...');
+
+  const suite = defineAPIs([
+    {
+      title: "Initializer - Create test user",
+      POST: "/api/users",
+      save: "user",
+      request: {
+        username: `test_user_${Date.now()}`,
+        email: `test_${Date.now()}@example.com`,
+        password: "TestPass123!",
+        role: "admin"
+      } as CreateUserRequest,
+      response: User,
+      status: [200, 201]
+    },
+  ], config);
+
+  const { testCases } = createTestCases(suite);
+  
+  for (const tc of testCases) {
+    await tc.execute(request);
+  }
+
+  console.log('✅ Test data initialization complete');
+}
+
+```
+
 api/example.spec.ts
 
 ```ts
 import { test } from '@playwright/test';
-import { defineAPIs, createTestCases } from '@otmc-sw/tester';
+import { defineAPIs, createTestCases, GetId } from '@otmc-sw/tester';
 import { User, CreateUserRequest, UpdateUserRequest } from '../types.js';
 import config from '../config.js';
 
+const userId = GetId("user");
+
 const suite = defineAPIs([
   {
-    title: "List Users - Get all users",
+    title: "Users - Get all users",
     GET: "/users",
     response: User,
     status: 200
   },
 
   {
-    title: "Create User - Create admin user",
+    title: "User - Create admin user",
     POST: "/users",
     request: {
-      username: "admin_user",
-      email: "admin@example.com",
-      password: "SecurePass123!",
+      username: `admin_user_${Date.now()}`,
+      email: `admin_${Date.now()}@example.com`,
+      password: "TestPass123!",
       role: "admin"
     } as CreateUserRequest,
     response: User,
-    status: 201
+    status: [200, 201]
   },
 
   {
-    title: "Get User - By ID",
-    GET: "/users/1",
+    title: "User - Get by ID",
+    GET: `/users/${userId}`,
     response: User,
     status: 200
   },
 
   {
-    title: "Update User - Partial update - Email only",
-    PATCH: "/users/1",
+    title: "User - Update by ID",
+    PATCH: `/users/${userId}`,
     request: {
-      email: "new_email@example.com"
+      email: `email_updated_${Date.now()}@example.com`,
+      role: "user"
     } as UpdateUserRequest,
     response: User,
     status: 200
   },
 
   {
-    title: "Delete User - Non-existent user",
-    DELETE: "/users/99999",
-    status: 404
+    title: "User - Delete user by ID",
+    DELETE: `/users/${userId}`,
+    status: [200, 204]
   }
 ], config);
 
 test.describe('Users', () => {
   const { testCases } = createTestCases(suite);
+
   for (const tc of testCases) {
     test(tc.title, async ({ request }) => {
       await tc.execute(request);
@@ -436,6 +507,7 @@ Always generate
 ```ts
 test.describe('Users', () => {
     const { testCases } = createTestCases(suite);
+
     for (const tc of testCases) {
         test(tc.title, async ({ request }) => {
             await tc.execute(request);
@@ -452,6 +524,7 @@ test.describe('Users', () => {
 ## Generation Rules
 
 * Read every API registered in `main.go`.
+* Remove un-used files in test project `tests/playwright/`.
 * Generate one `.spec.ts` file per resource.
 * Only generate success cases.
 * Use realistic sample values.
