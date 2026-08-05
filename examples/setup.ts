@@ -9,7 +9,7 @@ import { GlobalSetup } from './utils/prepare.js';
 import { InitializeTestData } from './utils/initializer.js';
 
 export default async function globalSetup(config: FullConfig) {
-  const baseURL = config.projects[0].use.baseURL || 'http://localhost:5007';
+  const baseURL = config.projects[0].use.baseURL;
   console.log(`🔍 Testing connection to ${baseURL}...`);
 
   try {
@@ -26,7 +26,7 @@ export default async function globalSetup(config: FullConfig) {
 
     throw new Error(`❌ Server returned error status: ${response.status()}`);
   } catch (error) {
-    console.error(`❌ Cannot connect to server at ${baseURL}`);
+    console.error(`❌ Failed to setup test environment at ${baseURL}`);
     console.error(`   Error: ${error instanceof Error ? error.message : error}`);
     throw error;
   }

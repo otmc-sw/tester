@@ -7,7 +7,6 @@ import { defineConfig, devices } from '@playwright/test';
 import { GetAccessToken } from '../src/utils/api';
 
 const accessToken = GetAccessToken();
-console.log('Access Token:', accessToken);
 
 export default defineConfig({
   fullyParallel: false,

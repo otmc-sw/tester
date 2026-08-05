@@ -63,7 +63,7 @@ export interface APITestCase<TRequest = unknown, TResponse extends object = obje
 }
 
 export interface ProjectConfig {
-  baseURL: string;
+  baseURL?: string;
   response?: ResponseContractConfig;
 }
 

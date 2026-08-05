@@ -6,7 +6,6 @@
 import { defineConfig } from '../src/index.js';
 
 export default defineConfig({
-  baseURL: 'http://localhost:3000',
   response: {
     success: {
       successField: 'success',
