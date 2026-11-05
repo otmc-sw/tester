@@ -72,7 +72,7 @@ Do **NOT** generate:
 
 ```bash
 cd tests/playwright
-npm install @otmc-sw/tester@latest
+npm install @otmc/tester@latest
 ```
 
 ---
@@ -110,7 +110,7 @@ export default async function globalSetup(config: FullConfig) {
 config.ts
 
 ```ts
-import { defineConfig } from '@otmc-sw/tester';
+import { defineConfig } from '@otmc/tester';
 
 export default defineConfig({
   response: {
@@ -181,7 +181,7 @@ utils/initializer.ts
 
 ```ts
 import { type APIRequestContext } from '@playwright/test';
-import { defineAPIs, createTestCases } from '@otmc-sw/tester';
+import { defineAPIs, createTestCases } from '@otmc/tester';
 import { User, CreateUserRequest, Product, CreateProductRequest } from '../types.js';
 import config from '../config.js';
 
@@ -219,7 +219,7 @@ api/example.spec.ts
 
 ```ts
 import { test } from '@playwright/test';
-import { defineAPIs, createTestCases, GetId } from '@otmc-sw/tester';
+import { defineAPIs, createTestCases, GetId } from '@otmc/tester';
 import { User, CreateUserRequest, UpdateUserRequest } from '../types.js';
 import config from '../config.js';
 
